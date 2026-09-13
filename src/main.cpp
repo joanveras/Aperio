@@ -45,7 +45,8 @@ void loop()
 {
 }
 
-void printCentered(const char *text, int16_t y, uint8_t textSize, uint16_t color) {
+void printCentered(const char *text, int16_t y, uint8_t textSize, uint16_t color)
+{
   int16_t x1, y1;
   uint16_t w, h;
 
@@ -58,7 +59,8 @@ void printCentered(const char *text, int16_t y, uint8_t textSize, uint16_t color
   tft.print(text);
 }
 
-void showTitle() {
+void showTitle()
+{
   tft.fillScreen(ILI9341_BLACK);
 
   printCentered("Aperio", 90, 4, ILI9341_WHITE);
