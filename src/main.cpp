@@ -8,6 +8,10 @@
 #define TFT_DC 2
 #define TFT_RST 27
 
+constexpr uint8_t BTN_LEFT   = 25;
+constexpr uint8_t BTN_SELECT = 26;
+constexpr uint8_t BTN_RIGHT  = 32;
+
 // Use hardware SPI (on Uno, #13, #12, #11) and the above for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 // If using the breakout, change pins as desired
@@ -39,10 +43,32 @@ void setup()
   delay(500);
 
   showTitle();
+
+  // Testing push buttons
+  pinMode(25, INPUT_PULLUP);
+  pinMode(26, INPUT_PULLUP);
+  pinMode(32, INPUT_PULLUP);
 }
 
 void loop()
 {
+  if (digitalRead(BTN_LEFT) == LOW)
+  {
+    Serial.println("LEFT pressionado");
+    delay(200);
+  }
+
+  if (digitalRead(BTN_SELECT) == LOW)
+  {
+    Serial.println("SELECT pressionado");
+    delay(200);
+  }
+
+  if (digitalRead(BTN_RIGHT) == LOW)
+  {
+    Serial.println("RIGHT pressionado");
+    delay(200);
+  }
 }
 
 void printCentered(const char *text, int16_t y, uint8_t textSize, uint16_t color)
