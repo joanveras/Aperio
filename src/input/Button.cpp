@@ -51,17 +51,17 @@ void Button::update(uint32_t now)
   {
     if (reading != currentState)
     {
-        currentState = reading;
+      currentState = reading;
   
-        if (currentState)
-        {
-          pressStartTime = now;
-          longPressTriggered = false;
-        }
-        else if (!longPressTriggered)
-        {
-          pressEvent = true;
-        }
+      if (currentState)
+      {
+        pressStartTime = now;
+        longPressTriggered = false;
+      }
+      else if (!longPressTriggered)
+      {
+        pressEvent = true;
+      }
     }
   }
 
