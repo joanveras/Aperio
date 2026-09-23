@@ -43,36 +43,36 @@ void Button::update(uint32_t now)
 
   if (reading != previousState)
   {
-  lastChangeTime = now;
-  previousState = reading;
+    lastChangeTime = now;
+    previousState = reading;
   }
 
   if (now - lastChangeTime >= DEBOUNCE_TIME)
   {
-  if (reading != currentState)
-  {
-      currentState = reading;
-
-      if (currentState)
-      {
-        pressStartTime = now;
-        longPressTriggered = false;
-      }
-      else if (!longPressTriggered)
-      {
-        pressEvent = true;
-      }
-  }
+    if (reading != currentState)
+    {
+        currentState = reading;
+  
+        if (currentState)
+        {
+          pressStartTime = now;
+          longPressTriggered = false;
+        }
+        else if (!longPressTriggered)
+        {
+          pressEvent = true;
+        }
+    }
   }
 
   if (currentState && !longPressTriggered)
   {
-  uint32_t timePressed = now - pressStartTime;
-  if (timePressed >= LONG_PRESS_TIME)
-  {
-    longPressEvent = true;
-    longPressTriggered = true;
-  }
+    uint32_t timePressed = now - pressStartTime;
+    if (timePressed >= LONG_PRESS_TIME)
+    {
+      longPressEvent = true;
+      longPressTriggered = true;
+    }
   }
 }
 
