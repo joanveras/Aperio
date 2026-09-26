@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Screen.hpp"
+#include <cstddef>
 
 class ScreenManager {
 public:
@@ -14,6 +15,9 @@ public:
   void render();
 
 private:
+  static constexpr size_t MAX_HISTORY = 8;
+  size_t historySize = 0;
+
+  Screen* history[MAX_HISTORY] = {};
   Screen* currentScreen = nullptr;
-  Screen* previousScreen = nullptr;
 };
