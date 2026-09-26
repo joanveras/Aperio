@@ -12,9 +12,12 @@ enum class InputEvent {
 
 class InputManager {
 public:
-  InputManager(uint8_t previousPin,
+  InputManager(
+    uint8_t previousPin,
     uint8_t selectPin,
-    uint8_t nextPin);
+    uint8_t nextPin,
+    InputEvent event = InputEvent::NONE
+  );
 
   void begin();
   void update();
