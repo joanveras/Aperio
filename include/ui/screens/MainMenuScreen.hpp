@@ -1,15 +1,21 @@
 #pragma once
 
 #include <Arduino.h>
-#include <Arduino_GFX_Library.h>
+#include <Adafruit_ILI9341.h>
+#include <functional>
 
-#include "Screen.hpp"
-#include "MenuItem.hpp"
+#include "ui/Screen.hpp"
+#include "ui/MenuItem.hpp"
+
+using NavigationCallback = std::function<void(ScreenId)>;
 
 class MainMenuScreen : public Screen
 {
 public:
-  explicit MainMenuScreen(Arduino_GFX* displayInstance);
+  explicit MainMenuScreen(
+    Adafruit_ILI9341* displayInstance,
+    NavigationCallback navigationCallback
+  );
 
   void onEnter() override;
   void handleInput(InputEvent event) override;
@@ -17,7 +23,8 @@ public:
   void render() override;
 
 private:
-  Arduino_GFX* display;
+  Adafruit_ILI9341* display;
+  NavigationCallback navigationCallback;
 
   int selectedIndex;
   int firstVisibleItem;
