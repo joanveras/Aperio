@@ -139,6 +139,7 @@ void AperioApp::handleNavigation(ScreenId screenId)
     case ScreenId::WIFI_NETWORKS:
       placeholderScreen.setTitle("NETWORKS");
       screenManager.setScreen(&placeholderScreen);
+      break;
 
     case ScreenId::WIFI_NETWORK_DETAILS:
       placeholderScreen.setTitle("NETWORK DETAILS");
@@ -148,10 +149,12 @@ void AperioApp::handleNavigation(ScreenId screenId)
     case ScreenId::WIFI_CHANNELS:
       placeholderScreen.setTitle("CHANNELS");
       screenManager.setScreen(&placeholderScreen);
+      break;
 
     case ScreenId::WIFI_MONITOR:
       placeholderScreen.setTitle("MONITOR");
       screenManager.setScreen(&placeholderScreen);
+      break;
 
     case ScreenId::BLUETOOTH_MENU:
       placeholderScreen.setTitle("BLUETOOTH");
