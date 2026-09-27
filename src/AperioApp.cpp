@@ -21,8 +21,23 @@ AperioApp::AperioApp(
         handleNavigation(screenId);
       }
     ),
+    placeholderScreen(displayInstance),
     aboutScreen(displayInstance),
-    placeholderScreen(displayInstance)
+    wifiScreen(
+      displayInstance,
+      [this](ScreenId screenId)
+      {
+        handleNavigation(screenId);
+      }
+    ),
+    wifiScanScreen(
+      displayInstance,
+      &wifiScanner,
+      [this](ScreenId screenId)
+      {
+        handleNavigation(screenId);
+      }
+    )
 {
 }
 
@@ -36,6 +51,8 @@ void AperioApp::begin()
   showBootScreen();
 
   screenManager.begin(&mainMenu);
+
+  wifiScanner.begin();
 }
 
 void AperioApp::update()
@@ -111,9 +128,30 @@ void AperioApp::handleNavigation(ScreenId screenId)
   switch (screenId)
   {
     case ScreenId::WIFI_MENU:
-      placeholderScreen.setTitle("WI-FI");
+      screenManager.setScreen(&wifiScreen);
+      break;
+
+    case ScreenId::WIFI_SCAN:
+      wifiScanScreen.startScan();
+      screenManager.setScreen(&wifiScanScreen);
+      break;
+
+    case ScreenId::WIFI_NETWORKS:
+      placeholderScreen.setTitle("NETWORKS");
+      screenManager.setScreen(&placeholderScreen);
+
+    case ScreenId::WIFI_NETWORK_DETAILS:
+      placeholderScreen.setTitle("NETWORK DETAILS");
       screenManager.setScreen(&placeholderScreen);
       break;
+
+    case ScreenId::WIFI_CHANNELS:
+      placeholderScreen.setTitle("CHANNELS");
+      screenManager.setScreen(&placeholderScreen);
+
+    case ScreenId::WIFI_MONITOR:
+      placeholderScreen.setTitle("MONITOR");
+      screenManager.setScreen(&placeholderScreen);
 
     case ScreenId::BLUETOOTH_MENU:
       placeholderScreen.setTitle("BLUETOOTH");
