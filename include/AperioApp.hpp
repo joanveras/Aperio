@@ -8,6 +8,9 @@
 #include "ui/screens/MainMenuScreen.hpp"
 #include "ui/screens/PlaceholderScreen.hpp"
 #include "ui/screens/AboutScreen.hpp"
+#include "ui/screens/WifiMenuScreen.hpp"
+#include "ui/screens/WifiScanScreen.hpp"
+#include "wifi/WifiScanner.hpp"
 
 class AperioApp
 {
@@ -28,8 +31,12 @@ private:
     InputManager input;
     ScreenManager screenManager;
     MainMenuScreen mainMenu;
-    AboutScreen aboutScreen;
     PlaceholderScreen placeholderScreen;
+    AboutScreen aboutScreen;
+
+    WifiMenuScreen wifiScreen;
+    WifiScanner wifiScanner;
+    WifiScanScreen wifiScanScreen;
 
     void showBootScreen();
     void handleNavigation(ScreenId screenId);
