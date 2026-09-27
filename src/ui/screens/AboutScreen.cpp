@@ -30,7 +30,6 @@ void AboutScreen::render()
   display->fillScreen(ILI9341_BLACK);
   display->setTextWrap(false);
 
-  // Header
   display->setTextSize(2);
   display->setTextColor(ILI9341_WHITE);
   display->setCursor(10, 10);
@@ -43,7 +42,6 @@ void AboutScreen::render()
     ILI9341_WHITE
   );
 
-  // Identidade
   drawCentered(
     "APERIO",
     58,
@@ -58,7 +56,6 @@ void AboutScreen::render()
     ILI9341_WHITE
   );
 
-  // Informações
   display->setTextSize(1);
   display->setTextColor(ILI9341_WHITE);
 
@@ -82,22 +79,21 @@ void AboutScreen::render()
 
   drawCentered(
     "github.com/joanveras/Aperio",
-    178,
+    184,
     1,
     ILI9341_WHITE
   );
 
-  // Footer
   display->drawFastHLine(
     8,
-    199,
+    204,
     display->width() - 16,
     ILI9341_WHITE
   );
 
   drawCentered(
     "HOLD OK : BACK",
-    216,
+    220,
     1,
     ILI9341_WHITE
   );
