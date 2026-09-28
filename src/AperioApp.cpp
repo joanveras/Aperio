@@ -37,6 +37,10 @@ AperioApp::AperioApp(
       {
         handleNavigation(screenId);
       }
+    ),
+    wifiMonitorScreen(
+      displayInstance,
+      &wifiMonitor
     )
 {
 }
@@ -152,8 +156,7 @@ void AperioApp::handleNavigation(ScreenId screenId)
       break;
 
     case ScreenId::WIFI_MONITOR:
-      placeholderScreen.setTitle("MONITOR");
-      screenManager.setScreen(&placeholderScreen);
+      screenManager.setScreen(&wifiMonitorScreen);
       break;
 
     case ScreenId::BLUETOOTH_MENU:
