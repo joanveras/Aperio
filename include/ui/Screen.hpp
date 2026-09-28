@@ -5,6 +5,7 @@
 class Screen {
 public:
   virtual void onEnter() = 0;
+  virtual void onExit() {};
   virtual void handleInput(InputEvent event) = 0;
   virtual void update() = 0;
   virtual void render() = 0;
