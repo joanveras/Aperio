@@ -10,7 +10,9 @@
 #include "ui/screens/AboutScreen.hpp"
 #include "ui/screens/WifiMenuScreen.hpp"
 #include "ui/screens/WifiScanScreen.hpp"
+#include "ui/screens/WifiMonitorScreen.hpp"
 #include "wifi/WifiScanner.hpp"
+#include "wifi/WifiMonitor.hpp"
 
 class AperioApp
 {
@@ -37,6 +39,8 @@ private:
     WifiMenuScreen wifiScreen;
     WifiScanner wifiScanner;
     WifiScanScreen wifiScanScreen;
+    WifiMonitor wifiMonitor;
+    WifiMonitorScreen wifiMonitorScreen;
 
     void showBootScreen();
     void handleNavigation(ScreenId screenId);
