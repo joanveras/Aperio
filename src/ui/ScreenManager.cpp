@@ -12,7 +12,8 @@ void ScreenManager::begin(Screen* initialScreen)
   }
 }
 
-void ScreenManager::setScreen(Screen* screen) {
+void ScreenManager::setScreen(Screen* screen)
+{
   if (screen == nullptr)
   {
     return;
@@ -30,6 +31,8 @@ void ScreenManager::setScreen(Screen* screen) {
       return;
     }
 
+    currentScreen->onExit();
+
     history[historySize] = currentScreen;
     historySize++;
   }
@@ -45,15 +48,23 @@ void ScreenManager::goBack()
     return;
   }
 
+  if (currentScreen)
+  {
+    currentScreen->onExit();
+  }
+
   historySize--;
 
   Screen* priorScreen = history[historySize];
 
-  currentScreen = priorScreen;
-
   history[historySize] = nullptr;
 
-  currentScreen->onEnter();
+  currentScreen = priorScreen;
+
+  if (currentScreen)
+  {
+    currentScreen->onEnter();
+  }
 }
 
 void ScreenManager::handleInput(InputEvent event)
