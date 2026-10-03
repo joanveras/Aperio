@@ -87,6 +87,8 @@ private:
     const WifiManagementEvent& event
   );
 
+  void incrementStat(volatile uint32_t& counter);
+
   struct KnownApChannel
   {
     uint8_t bssid[6] = {};
@@ -126,6 +128,12 @@ private:
   bool paused = false;
 
   uint8_t currentChannel = 6;
+
+  // Guards the frame counters below, which are written from the
+  // Wi-Fi driver's promiscuous callback (a different task) and read
+  // from getStats()/resetStats() on the loop/UI side.
+  mutable portMUX_TYPE statsMux =
+    portMUX_INITIALIZER_UNLOCKED;
 
   volatile uint32_t totalFrames = 0;
 
