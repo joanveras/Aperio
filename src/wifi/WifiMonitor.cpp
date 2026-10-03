@@ -88,14 +88,19 @@ bool WifiMonitor::start(uint8_t channel)
 
   activeInstance = this;
 
+  portENTER_CRITICAL(&stateMux);
   paused = false;
   running = true;
+  portEXIT_CRITICAL(&stateMux);
 
   esp_err_t result = esp_wifi_set_promiscuous(true);
 
   if (result != ESP_OK)
   {
+    portENTER_CRITICAL(&stateMux);
     running = false;
+    portEXIT_CRITICAL(&stateMux);
+
     return false;
   }
 
@@ -113,31 +118,44 @@ void WifiMonitor::stop()
 
   esp_wifi_set_promiscuous(false);
 
+  portENTER_CRITICAL(&stateMux);
   running = false;
   paused = false;
+  portEXIT_CRITICAL(&stateMux);
 
   framesPerSecond = 0;
 }
 
 void WifiMonitor::pause()
 {
+  portENTER_CRITICAL(&stateMux);
+
   if (!running)
   {
+    portEXIT_CRITICAL(&stateMux);
     return;
   }
 
   paused = true;
+
+  portEXIT_CRITICAL(&stateMux);
+
   framesPerSecond = 0;
 }
 
 void WifiMonitor::resume()
 {
+  portENTER_CRITICAL(&stateMux);
+
   if (!running)
   {
+    portEXIT_CRITICAL(&stateMux);
     return;
   }
 
   paused = false;
+
+  portEXIT_CRITICAL(&stateMux);
 
   portENTER_CRITICAL(&statsMux);
   previousFrameCount = totalFrames;
@@ -149,12 +167,20 @@ void WifiMonitor::resume()
 
 bool WifiMonitor::isRunning() const
 {
-  return running;
+  portENTER_CRITICAL(&stateMux);
+  bool value = running;
+  portEXIT_CRITICAL(&stateMux);
+
+  return value;
 }
 
 bool WifiMonitor::isPaused() const
 {
-  return paused;
+  portENTER_CRITICAL(&stateMux);
+  bool value = paused;
+  portEXIT_CRITICAL(&stateMux);
+
+  return value;
 }
 
 bool WifiMonitor::setChannel(uint8_t channel)
@@ -297,225 +323,205 @@ void WifiMonitor::promiscuousCallback(
   activeInstance->handlePacket(buffer, type);
 }
 
-void WifiMonitor::incrementStat(volatile uint32_t& counter)
-{
-  portENTER_CRITICAL(&statsMux);
-  counter++;
-  portEXIT_CRITICAL(&statsMux);
-}
-
 void WifiMonitor::handlePacket(
   void* buffer,
   wifi_promiscuous_pkt_type_t type
 )
 {
-  if (!running || paused || buffer == nullptr)
+  if (buffer == nullptr)
   {
     return;
   }
 
-  incrementStat(totalFrames);
+  portENTER_CRITICAL(&stateMux);
+  bool isActive = running && !paused;
+  portEXIT_CRITICAL(&stateMux);
+
+  if (!isActive)
+  {
+    return;
+  }
+
+  const wifi_promiscuous_pkt_t* packet =
+    static_cast<const wifi_promiscuous_pkt_t*>(buffer);
+
+  if (type == WIFI_PKT_MGMT)
+  {
+    // Classify before taking statsMux: this only reads one byte of
+    // the (already-captured, immutable) frame, no shared state.
+    ManagementSubtype subtype =
+      classifyManagementSubtype(
+        packet->payload,
+        packet->rx_ctrl.sig_len
+      );
+
+    // Single critical section for every counter tied to this one
+    // packet, so a concurrent getStats() can never observe total
+    // out of sync with management/control/data/misc (or with the
+    // management subtype counters).
+    portENTER_CRITICAL(&statsMux);
+
+    totalFrames++;
+    managementFrames++;
+
+    switch (subtype)
+    {
+      case ManagementSubtype::ProbeRequest:
+        probeRequestFrames++;
+        break;
+
+      case ManagementSubtype::ProbeResponse:
+        probeResponseFrames++;
+        break;
+
+      case ManagementSubtype::Beacon:
+        beaconFrames++;
+        break;
+
+      case ManagementSubtype::Disassociation:
+        disassociationFrames++;
+        break;
+
+      case ManagementSubtype::Deauthentication:
+        deauthFrames++;
+        break;
+
+      default:
+        break;
+    }
+
+    portEXIT_CRITICAL(&statsMux);
+
+    // Parsing, the known-AP lookup, and addManagementEvent() all
+    // happen outside statsMux.
+    handleManagementFrame(
+      subtype,
+      packet->payload,
+      packet->rx_ctrl.sig_len,
+      packet->rx_ctrl.rssi,
+      packet->rx_ctrl.channel
+    );
+
+    return;
+  }
+
+  portENTER_CRITICAL(&statsMux);
+
+  totalFrames++;
 
   switch (type)
   {
-    case WIFI_PKT_MGMT:
-    {
-      incrementStat(managementFrames);
-
-      const wifi_promiscuous_pkt_t* packet =
-        static_cast<const wifi_promiscuous_pkt_t*>(buffer);
-
-      handleManagementFrame(
-        packet->payload,
-        packet->rx_ctrl.sig_len,
-        packet->rx_ctrl.rssi,
-        packet->rx_ctrl.channel
-      );
-
-      break;
-    }
-
     case WIFI_PKT_CTRL:
-      incrementStat(controlFrames);
+      controlFrames++;
       break;
 
     case WIFI_PKT_DATA:
-      incrementStat(dataFrames);
+      dataFrames++;
       break;
 
     case WIFI_PKT_MISC:
-      incrementStat(miscFrames);
+      miscFrames++;
       break;
 
     default:
       break;
   }
+
+  portEXIT_CRITICAL(&statsMux);
+}
+
+WifiMonitor::ManagementSubtype WifiMonitor::classifyManagementSubtype(
+  const uint8_t* payload,
+  uint16_t length
+) const
+{
+  constexpr uint8_t UNKNOWN_SUBTYPE = 0xFF;
+
+  if (payload == nullptr || length < 2)
+  {
+    return static_cast<ManagementSubtype>(UNKNOWN_SUBTYPE);
+  }
+
+  return static_cast<ManagementSubtype>((payload[0] >> 4) & 0x0F);
 }
 
 void WifiMonitor::handleManagementFrame(
+  ManagementSubtype subtype,
   const uint8_t* payload,
   uint16_t length,
   int8_t rssi,
   uint8_t channel
 )
 {
-  if (payload == nullptr || length < 2)
+  WifiManagementEventType eventType;
+
+  switch (subtype)
+  {
+    case ManagementSubtype::Disassociation:
+      eventType = WifiManagementEventType::DISASSOCIATION;
+      break;
+
+    case ManagementSubtype::Deauthentication:
+      eventType = WifiManagementEventType::DEAUTHENTICATION;
+      break;
+
+    default:
+      return;
+  }
+
+  if (payload == nullptr || length < 26)
   {
     return;
   }
 
-  uint8_t frameControl = payload[0];
+  WifiManagementEvent event;
 
-  ManagementSubtype subtype =
-    static_cast<ManagementSubtype>((frameControl >> 4) & 0x0F);
+  event.type = eventType;
 
-  switch (subtype)
+  event.reasonCode =
+    static_cast<uint16_t>(payload[24]) |
+    (
+      static_cast<uint16_t>(payload[25])
+      << 8
+    );
+
+  event.rssi = rssi;
+  event.receivedChannel = channel;
+
+  std::memcpy(
+    event.destination,
+    payload + 4,
+    6
+  );
+
+  std::memcpy(
+    event.source,
+    payload + 10,
+    6
+  );
+
+  std::memcpy(
+    event.bssid,
+    payload + 16,
+    6
+  );
+
+  uint8_t knownChannel = 0;
+
+  if (
+    findKnownApChannel(
+      event.bssid,
+      knownChannel
+    )
+  )
   {
-    case ManagementSubtype::ProbeRequest:
-      incrementStat(probeRequestFrames);
-      break;
-
-    case ManagementSubtype::ProbeResponse:
-      incrementStat(probeResponseFrames);
-      break;
-
-    case ManagementSubtype::Beacon:
-      incrementStat(beaconFrames);
-      break;
-
-    case ManagementSubtype::Disassociation:
-    {
-      incrementStat(disassociationFrames);
-
-      if (length < 26)
-      {
-        break;
-      }
-
-      WifiManagementEvent event;
-
-      event.type =
-        WifiManagementEventType::DISASSOCIATION;
-
-      event.reasonCode =
-        static_cast<uint16_t>(payload[24]) |
-        (
-          static_cast<uint16_t>(payload[25])
-          << 8
-        );
-
-      event.rssi = rssi;
-      event.receivedChannel = channel;
-
-      std::memcpy(
-        event.destination,
-        payload + 4,
-        6
-      );
-
-      std::memcpy(
-        event.source,
-        payload + 10,
-        6
-      );
-
-      std::memcpy(
-        event.bssid,
-        payload + 16,
-        6
-      );
-
-      uint8_t knownChannel = 0;
-
-      if (
-        findKnownApChannel(
-          event.bssid,
-          knownChannel
-        )
-      )
-      {
-        event.networkChannel =
-          knownChannel;
-
-        event.networkChannelKnown =
-          true;
-      }
-
-      event.valid = true;
-
-      addManagementEvent(event);
-
-      break;
-    }
-
-    case ManagementSubtype::Deauthentication:
-    {
-      incrementStat(deauthFrames);
-
-      if (length < 26)
-      {
-        break;
-      }
-
-      WifiManagementEvent event;
-
-      event.type =
-        WifiManagementEventType::DEAUTHENTICATION;
-
-      event.reasonCode =
-        static_cast<uint16_t>(payload[24]) |
-        (
-          static_cast<uint16_t>(payload[25])
-          << 8
-        );
-
-      event.rssi = rssi;
-      event.receivedChannel = channel;
-
-      std::memcpy(
-        event.destination,
-        payload + 4,
-        6
-      );
-
-      std::memcpy(
-        event.source,
-        payload + 10,
-        6
-      );
-
-      std::memcpy(
-        event.bssid,
-        payload + 16,
-        6
-      );
-
-      uint8_t knownChannel = 0;
-
-      if (
-        findKnownApChannel(
-          event.bssid,
-          knownChannel
-        )
-      )
-      {
-        event.networkChannel =
-          knownChannel;
-
-        event.networkChannelKnown =
-          true;
-      }
-
-      event.valid = true;
-
-      addManagementEvent(event);
-
-      break;
-    }
-
-    default:
-      break;
+    event.networkChannel = knownChannel;
+    event.networkChannelKnown = true;
   }
+
+  event.valid = true;
+
+  addManagementEvent(event);
 }
 
 void WifiMonitor::addManagementEvent(const WifiManagementEvent& event)
