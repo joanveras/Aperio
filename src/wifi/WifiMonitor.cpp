@@ -1,6 +1,7 @@
 #include "../../include/wifi/WifiMonitor.hpp"
 
 #include <WiFi.h>
+#include <cstring>
 
 WifiMonitor* WifiMonitor::activeInstance = nullptr;
 
@@ -159,6 +160,14 @@ bool WifiMonitor::setChannel(uint8_t channel)
     return false;
   }
 
+  if (!initialized)
+  {
+    if (!begin())
+    {
+      return false;
+    }
+  }
+
   esp_err_t result =
     esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
 
@@ -213,17 +222,30 @@ WifiMonitorStats WifiMonitor::getStats() const
   WifiMonitorStats stats;
 
   stats.totalFrames = totalFrames;
+
   stats.framesPerSecond = framesPerSecond;
 
   stats.managementFrames = managementFrames;
+
   stats.controlFrames = controlFrames;
+
   stats.dataFrames = dataFrames;
+
   stats.miscFrames = miscFrames;
 
   stats.beaconFrames = beaconFrames;
+
   stats.probeRequestFrames = probeRequestFrames;
+
   stats.probeResponseFrames = probeResponseFrames;
+
   stats.deauthFrames = deauthFrames;
+
+  stats.disassociationFrames = disassociationFrames;
+
+  portENTER_CRITICAL(&managementEventMux);
+  stats.lastManagementEvent = lastManagementEvent;
+  portEXIT_CRITICAL(&managementEventMux);
 
   stats.channel = currentChannel;
 
@@ -242,7 +264,11 @@ void WifiMonitor::resetStats()
   beaconFrames = 0;
   probeRequestFrames = 0;
   probeResponseFrames = 0;
+
   deauthFrames = 0;
+  disassociationFrames = 0;
+
+  clearManagementEvents();
 
   framesPerSecond = 0;
   previousFrameCount = 0;
@@ -283,12 +309,12 @@ void WifiMonitor::handlePacket(
       const wifi_promiscuous_pkt_t* packet =
         static_cast<const wifi_promiscuous_pkt_t*>(buffer);
 
-      const uint8_t* payload = packet->payload;
-
-      uint16_t length =
-        packet->rx_ctrl.sig_len;
-
-      handleManagementFrame(payload, length);
+      handleManagementFrame(
+        packet->payload,
+        packet->rx_ctrl.sig_len,
+        packet->rx_ctrl.rssi,
+        packet->rx_ctrl.channel
+      );
 
       break;
     }
@@ -312,7 +338,9 @@ void WifiMonitor::handlePacket(
 
 void WifiMonitor::handleManagementFrame(
   const uint8_t* payload,
-  uint16_t length
+  uint16_t length,
+  int8_t rssi,
+  uint8_t channel
 )
 {
   if (payload == nullptr || length < 2)
@@ -339,13 +367,167 @@ void WifiMonitor::handleManagementFrame(
       beaconFrames++;
       break;
 
-    case ManagementSubtype::Deauthentication:
-      deauthFrames++;
+    case ManagementSubtype::Disassociation:
+    {
+      disassociationFrames++;
+
+      if (length < 26)
+      {
+        break;
+      }
+
+      WifiManagementEvent event;
+
+      event.type =
+        WifiManagementEventType::DISASSOCIATION;
+
+      event.reasonCode =
+        static_cast<uint16_t>(payload[24]) |
+        (
+          static_cast<uint16_t>(payload[25])
+          << 8
+        );
+
+      event.rssi = rssi;
+      event.receivedChannel = channel;
+
+      std::memcpy(
+        event.destination,
+        payload + 4,
+        6
+      );
+
+      std::memcpy(
+        event.source,
+        payload + 10,
+        6
+      );
+
+      std::memcpy(
+        event.bssid,
+        payload + 16,
+        6
+      );
+
+      uint8_t knownChannel = 0;
+
+      if (
+        findKnownApChannel(
+          event.bssid,
+          knownChannel
+        )
+      )
+      {
+        event.networkChannel =
+          knownChannel;
+
+        event.networkChannelKnown =
+          true;
+      }
+
+      event.valid = true;
+
+      addManagementEvent(event);
+
       break;
+    }
+
+    case ManagementSubtype::Deauthentication:
+    {
+      deauthFrames++;
+
+      if (length < 26)
+      {
+        break;
+      }
+
+      WifiManagementEvent event;
+
+      event.type =
+        WifiManagementEventType::DEAUTHENTICATION;
+
+      event.reasonCode =
+        static_cast<uint16_t>(payload[24]) |
+        (
+          static_cast<uint16_t>(payload[25])
+          << 8
+        );
+
+      event.rssi = rssi;
+      event.receivedChannel = channel;
+
+      std::memcpy(
+        event.destination,
+        payload + 4,
+        6
+      );
+
+      std::memcpy(
+        event.source,
+        payload + 10,
+        6
+      );
+
+      std::memcpy(
+        event.bssid,
+        payload + 16,
+        6
+      );
+
+      uint8_t knownChannel = 0;
+
+      if (
+        findKnownApChannel(
+          event.bssid,
+          knownChannel
+        )
+      )
+      {
+        event.networkChannel =
+          knownChannel;
+
+        event.networkChannelKnown =
+          true;
+      }
+
+      event.valid = true;
+
+      addManagementEvent(event);
+
+      break;
+    }
 
     default:
       break;
   }
+}
+
+void WifiMonitor::addManagementEvent(const WifiManagementEvent& event)
+{
+  if (!event.valid)
+  {
+    return;
+  }
+
+  portENTER_CRITICAL(
+    &managementEventMux
+  );
+
+  managementEventHistory[nextManagementEventIndex] = event;
+
+  nextManagementEventIndex =
+    (nextManagementEventIndex + 1) % MANAGEMENT_EVENT_HISTORY_SIZE;
+
+  if (managementEventCount < MANAGEMENT_EVENT_HISTORY_SIZE)
+  {
+    managementEventCount++;
+  }
+
+  lastManagementEvent = event;
+
+  portEXIT_CRITICAL(
+    &managementEventMux
+  );
 }
 
 bool WifiMonitor::nextChannel()
@@ -364,4 +546,257 @@ bool WifiMonitor::previousChannel()
       MAX_CHANNEL : currentChannel - 1;
 
   return setChannel(previous);
+}
+
+size_t WifiMonitor::getManagementEventCount() const
+{
+  portENTER_CRITICAL(
+    &managementEventMux
+  );
+
+  size_t count = managementEventCount;
+
+  portEXIT_CRITICAL(
+    &managementEventMux
+  );
+
+  return count;
+}
+
+bool WifiMonitor::getManagementEvent(
+  size_t index,
+  WifiManagementEvent& event
+) const
+{
+  portENTER_CRITICAL(
+    &managementEventMux
+  );
+
+  if (index >= managementEventCount)
+  {
+    portEXIT_CRITICAL(
+      &managementEventMux
+    );
+
+    return false;
+  }
+
+  size_t historyIndex =
+    (
+      nextManagementEventIndex +
+      MANAGEMENT_EVENT_HISTORY_SIZE -
+      1 -
+      index
+    ) %
+    MANAGEMENT_EVENT_HISTORY_SIZE;
+
+  event = managementEventHistory[historyIndex];
+
+  portEXIT_CRITICAL(
+    &managementEventMux
+  );
+
+  return true;
+}
+
+void WifiMonitor::clearManagementEvents()
+{
+  portENTER_CRITICAL(
+    &managementEventMux
+  );
+
+  managementEventCount = 0;
+  nextManagementEventIndex = 0;
+
+  lastManagementEvent = WifiManagementEvent{};
+
+  portEXIT_CRITICAL(
+    &managementEventMux
+  );
+}
+
+bool WifiMonitor::macEquals(const uint8_t* first, const uint8_t* second) const
+{
+  if (first == nullptr || second == nullptr)
+  {
+    return false;
+  }
+
+  for (size_t i = 0; i < 6; i++)
+  {
+    if (first[i] != second[i])
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool WifiMonitor::rememberApChannel(const uint8_t* bssid, uint8_t channel)
+{
+  if (
+    bssid == nullptr || channel < MIN_CHANNEL || channel > MAX_CHANNEL
+  )
+  {
+    return false;
+  }
+
+  portENTER_CRITICAL(
+    &knownApMux
+  );
+
+  for (size_t i = 0; i < KNOWN_AP_CACHE_SIZE; i++)
+  {
+    if (
+      knownApChannels[i].valid && macEquals(knownApChannels[i].bssid, bssid)
+    )
+    {
+      knownApChannels[i].channel = channel;
+
+      portEXIT_CRITICAL(
+        &knownApMux
+      );
+
+      return true;
+    }
+  }
+
+  for (
+    size_t i = 0;
+    i < KNOWN_AP_CACHE_SIZE;
+    i++
+  )
+  {
+    if (!knownApChannels[i].valid)
+    {
+      for (size_t j = 0; j < 6; j++)
+      {
+        knownApChannels[i].bssid[j] = bssid[j];
+      }
+
+      knownApChannels[i].channel = channel;
+
+      knownApChannels[i].valid = true;
+
+      if (knownApCount < KNOWN_AP_CACHE_SIZE)
+      {
+        knownApCount++;
+      }
+
+      portEXIT_CRITICAL(
+        &knownApMux
+      );
+
+      return true;
+    }
+  }
+
+  portEXIT_CRITICAL(
+    &knownApMux
+  );
+
+  return false;
+}
+
+bool WifiMonitor::rememberApChannel(const String& bssid, uint8_t channel)
+{
+  uint8_t mac[6];
+
+  if (!parseMacAddress(bssid, mac))
+  {
+    return false;
+  }
+
+  return rememberApChannel(mac, channel);
+}
+
+bool WifiMonitor::findKnownApChannel(const uint8_t* bssid, uint8_t& channel) const
+{
+  if (bssid == nullptr)
+  {
+    return false;
+  }
+
+  portENTER_CRITICAL(
+    &knownApMux
+  );
+
+  for (size_t i = 0; i < KNOWN_AP_CACHE_SIZE; i++)
+  {
+    if (
+      knownApChannels[i].valid && macEquals(knownApChannels[i].bssid, bssid)
+    )
+    {
+      channel = knownApChannels[i].channel;
+
+      portEXIT_CRITICAL(
+        &knownApMux
+      );
+
+      return true;
+    }
+  }
+
+  portEXIT_CRITICAL(
+    &knownApMux
+  );
+
+  return false;
+}
+
+bool WifiMonitor::parseMacAddress(const String& text, uint8_t* mac) const
+{
+  if (mac == nullptr)
+  {
+    return false;
+  }
+
+  unsigned int values[6];
+
+  int parsed = sscanf(
+    text.c_str(),
+    "%x:%x:%x:%x:%x:%x",
+    &values[0],
+    &values[1],
+    &values[2],
+    &values[3],
+    &values[4],
+    &values[5]
+  );
+
+  if (parsed != 6)
+  {
+    return false;
+  }
+
+  for (size_t i = 0; i < 6; i++)
+  {
+    if (values[i] > 0xFF)
+    {
+      return false;
+    }
+
+    mac[i] = static_cast<uint8_t>(values[i]);
+  }
+
+  return true;
+}
+
+void WifiMonitor::clearKnownApChannels()
+{
+  portENTER_CRITICAL(
+    &knownApMux
+  );
+
+  for (size_t i = 0; i < KNOWN_AP_CACHE_SIZE; i++)
+  {
+    knownApChannels[i] = KnownApChannel{};
+  }
+
+  knownApCount = 0;
+
+  portEXIT_CRITICAL(
+    &knownApMux
+  );
 }
