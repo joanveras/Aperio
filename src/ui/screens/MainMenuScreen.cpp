@@ -5,7 +5,7 @@ namespace
   constexpr MenuItem mainMenuItems[] = {
     {"Wi-Fi",     ScreenId::WIFI_MENU},
     {"Bluetooth", ScreenId::BLUETOOTH_MENU},
-    {"System",   ScreenId::SYSTEM_INFO},
+    {"System",    ScreenId::SYSTEM_INFO},
     {"About",     ScreenId::ABOUT}
   };
 
