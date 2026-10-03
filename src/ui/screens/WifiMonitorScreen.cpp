@@ -17,13 +17,14 @@ void WifiMonitorScreen::onEnter()
     return;
   }
 
-  monitor->start(monitor->getChannel());
+  monitorStartFailed = !monitor->start(monitor->getChannel());
 
   stats = monitor->getStats();
 
   lastRefreshTime = millis();
 
   needsFullRedraw = true;
+  needsHeaderRedraw = true;
   needsStatsRedraw = true;
   needsFooterRedraw = true;
 }
@@ -63,7 +64,7 @@ void WifiMonitorScreen::handleInput(
 
 void WifiMonitorScreen::update()
 {
-  if (monitor == nullptr)
+  if (monitor == nullptr || monitorStartFailed)
   {
     return;
   }
@@ -72,7 +73,7 @@ void WifiMonitorScreen::update()
 
   uint32_t now = millis();
 
-  if (now - lastRefreshTime <REFRESH_INTERVAL)
+  if (now - lastRefreshTime < REFRESH_INTERVAL)
   {
     return;
   }
@@ -96,10 +97,19 @@ void WifiMonitorScreen::render()
     drawScreen();
 
     needsFullRedraw = false;
+    needsHeaderRedraw = false;
     needsStatsRedraw = false;
     needsFooterRedraw = false;
 
     return;
+  }
+
+  if (needsHeaderRedraw)
+  {
+    clearHeaderArea();
+    drawHeader();
+
+    needsHeaderRedraw = false;
   }
 
   if (needsStatsRedraw)
@@ -121,7 +131,7 @@ void WifiMonitorScreen::render()
 
 void WifiMonitorScreen::handlePrevious()
 {
-  if (monitor == nullptr)
+  if (monitor == nullptr || monitorStartFailed)
   {
     return;
   }
@@ -136,7 +146,7 @@ void WifiMonitorScreen::handlePrevious()
 
 void WifiMonitorScreen::handleNext()
 {
-  if (monitor == nullptr)
+  if (monitor == nullptr || monitorStartFailed)
   {
     return;
   }
@@ -151,7 +161,7 @@ void WifiMonitorScreen::handleNext()
 
 void WifiMonitorScreen::handleSelect()
 {
-  if (monitor == nullptr)
+  if (monitor == nullptr || monitorStartFailed)
   {
     return;
   }
@@ -167,6 +177,7 @@ void WifiMonitorScreen::handleSelect()
 
   stats = monitor->getStats();
 
+  needsHeaderRedraw = true;
   needsStatsRedraw = true;
   needsFooterRedraw = true;
 }
@@ -178,7 +189,16 @@ void WifiMonitorScreen::drawScreen()
   display->setTextWrap(false);
 
   drawHeader();
-  drawStats();
+
+  if (monitorStartFailed)
+  {
+    drawError();
+  }
+  else
+  {
+    drawStats();
+  }
+
   drawFooter();
 }
 
@@ -312,6 +332,18 @@ void WifiMonitorScreen::drawFooter()
     ILI9341_WHITE
   );
 
+  if (monitorStartFailed)
+  {
+    drawCentered(
+      "HOLD OK : BACK",
+      220,
+      1,
+      ILI9341_WHITE
+    );
+
+    return;
+  }
+
   display->setTextSize(1);
   display->setTextColor(
     ILI9341_WHITE,
@@ -358,6 +390,17 @@ void WifiMonitorScreen::drawFooter()
   );
 }
 
+void WifiMonitorScreen::clearHeaderArea()
+{
+  display->fillRect(
+    0,
+    0,
+    display->width(),
+    40,
+    ILI9341_BLACK
+  );
+}
+
 void WifiMonitorScreen::clearStatsArea()
 {
   display->fillRect(
@@ -377,6 +420,23 @@ void WifiMonitorScreen::clearFooterArea()
     display->width(),
     55,
     ILI9341_BLACK
+  );
+}
+
+void WifiMonitorScreen::drawError()
+{
+  drawCentered(
+    "MONITOR ERROR",
+    92,
+    2,
+    ILI9341_WHITE
+  );
+
+  drawCentered(
+    "FAILED TO START",
+    124,
+    1,
+    ILI9341_WHITE
   );
 }
 
