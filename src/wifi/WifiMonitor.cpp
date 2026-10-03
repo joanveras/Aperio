@@ -1,4 +1,5 @@
 #include "../../include/wifi/WifiMonitor.hpp"
+#include "../../include/wifi/WifiManagementUtils.hpp"
 
 #include <WiFi.h>
 #include <cstring>
@@ -138,7 +139,10 @@ void WifiMonitor::resume()
 
   paused = false;
 
+  portENTER_CRITICAL(&statsMux);
   previousFrameCount = totalFrames;
+  portEXIT_CRITICAL(&statsMux);
+
   lastRateUpdate = millis();
   framesPerSecond = 0;
 }
@@ -179,7 +183,11 @@ bool WifiMonitor::setChannel(uint8_t channel)
   currentChannel = channel;
 
   framesPerSecond = 0;
+
+  portENTER_CRITICAL(&statsMux);
   previousFrameCount = totalFrames;
+  portEXIT_CRITICAL(&statsMux);
+
   lastRateUpdate = millis();
 
   return true;
@@ -205,7 +213,9 @@ void WifiMonitor::update()
     return;
   }
 
+  portENTER_CRITICAL(&statsMux);
   uint32_t currentFrameCount = totalFrames;
+  portEXIT_CRITICAL(&statsMux);
 
   uint32_t framesSinceLastUpdate =
     currentFrameCount - previousFrameCount;
@@ -221,27 +231,24 @@ WifiMonitorStats WifiMonitor::getStats() const
 {
   WifiMonitorStats stats;
 
+  portENTER_CRITICAL(&statsMux);
+
   stats.totalFrames = totalFrames;
-
-  stats.framesPerSecond = framesPerSecond;
-
   stats.managementFrames = managementFrames;
-
   stats.controlFrames = controlFrames;
-
   stats.dataFrames = dataFrames;
-
   stats.miscFrames = miscFrames;
 
   stats.beaconFrames = beaconFrames;
-
   stats.probeRequestFrames = probeRequestFrames;
-
   stats.probeResponseFrames = probeResponseFrames;
 
   stats.deauthFrames = deauthFrames;
-
   stats.disassociationFrames = disassociationFrames;
+
+  portEXIT_CRITICAL(&statsMux);
+
+  stats.framesPerSecond = framesPerSecond;
 
   portENTER_CRITICAL(&managementEventMux);
   stats.lastManagementEvent = lastManagementEvent;
@@ -254,6 +261,8 @@ WifiMonitorStats WifiMonitor::getStats() const
 
 void WifiMonitor::resetStats()
 {
+  portENTER_CRITICAL(&statsMux);
+
   totalFrames = 0;
 
   managementFrames = 0;
@@ -268,7 +277,7 @@ void WifiMonitor::resetStats()
   deauthFrames = 0;
   disassociationFrames = 0;
 
-  clearManagementEvents();
+  portEXIT_CRITICAL(&statsMux);
 
   framesPerSecond = 0;
   previousFrameCount = 0;
@@ -288,6 +297,13 @@ void WifiMonitor::promiscuousCallback(
   activeInstance->handlePacket(buffer, type);
 }
 
+void WifiMonitor::incrementStat(volatile uint32_t& counter)
+{
+  portENTER_CRITICAL(&statsMux);
+  counter++;
+  portEXIT_CRITICAL(&statsMux);
+}
+
 void WifiMonitor::handlePacket(
   void* buffer,
   wifi_promiscuous_pkt_type_t type
@@ -298,13 +314,13 @@ void WifiMonitor::handlePacket(
     return;
   }
 
-  totalFrames++;
+  incrementStat(totalFrames);
 
   switch (type)
   {
     case WIFI_PKT_MGMT:
     {
-      managementFrames++;
+      incrementStat(managementFrames);
 
       const wifi_promiscuous_pkt_t* packet =
         static_cast<const wifi_promiscuous_pkt_t*>(buffer);
@@ -320,15 +336,15 @@ void WifiMonitor::handlePacket(
     }
 
     case WIFI_PKT_CTRL:
-      controlFrames++;
+      incrementStat(controlFrames);
       break;
 
     case WIFI_PKT_DATA:
-      dataFrames++;
+      incrementStat(dataFrames);
       break;
 
     case WIFI_PKT_MISC:
-      miscFrames++;
+      incrementStat(miscFrames);
       break;
 
     default:
@@ -356,20 +372,20 @@ void WifiMonitor::handleManagementFrame(
   switch (subtype)
   {
     case ManagementSubtype::ProbeRequest:
-      probeRequestFrames++;
+      incrementStat(probeRequestFrames);
       break;
 
     case ManagementSubtype::ProbeResponse:
-      probeResponseFrames++;
+      incrementStat(probeResponseFrames);
       break;
 
     case ManagementSubtype::Beacon:
-      beaconFrames++;
+      incrementStat(beaconFrames);
       break;
 
     case ManagementSubtype::Disassociation:
     {
-      disassociationFrames++;
+      incrementStat(disassociationFrames);
 
       if (length < 26)
       {
@@ -434,7 +450,7 @@ void WifiMonitor::handleManagementFrame(
 
     case ManagementSubtype::Deauthentication:
     {
-      deauthFrames++;
+      incrementStat(deauthFrames);
 
       if (length < 26)
       {
@@ -617,20 +633,7 @@ void WifiMonitor::clearManagementEvents()
 
 bool WifiMonitor::macEquals(const uint8_t* first, const uint8_t* second) const
 {
-  if (first == nullptr || second == nullptr)
-  {
-    return false;
-  }
-
-  for (size_t i = 0; i < 6; i++)
-  {
-    if (first[i] != second[i])
-    {
-      return false;
-    }
-  }
-
-  return true;
+  return ::macEquals(first, second);
 }
 
 bool WifiMonitor::rememberApChannel(const uint8_t* bssid, uint8_t channel)
