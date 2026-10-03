@@ -76,7 +76,13 @@ private:
     wifi_promiscuous_pkt_type_t type
   );
 
+  ManagementSubtype classifyManagementSubtype(
+    const uint8_t* payload,
+    uint16_t length
+  ) const;
+
   void handleManagementFrame(
+    ManagementSubtype subtype,
     const uint8_t* payload,
     uint16_t length,
     int8_t rssi,
@@ -86,8 +92,6 @@ private:
   void addManagementEvent(
     const WifiManagementEvent& event
   );
-
-  void incrementStat(volatile uint32_t& counter);
 
   struct KnownApChannel
   {
@@ -124,6 +128,13 @@ private:
     portMUX_INITIALIZER_UNLOCKED;
 
   bool initialized = false;
+
+  // Guards running/paused, read from the promiscuous callback
+  // (handlePacket) and written from the loop/UI side (start, stop,
+  // pause, resume, isRunning, isPaused).
+  mutable portMUX_TYPE stateMux =
+    portMUX_INITIALIZER_UNLOCKED;
+
   bool running = false;
   bool paused = false;
 
