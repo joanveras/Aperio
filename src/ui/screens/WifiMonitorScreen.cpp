@@ -440,6 +440,14 @@ void WifiMonitorScreen::drawError()
   );
 }
 
+// LAST EVENT shows the most recent deauth/disassoc WifiMonitor knows
+// about that is compatible with the currently monitored channel, even
+// if it was captured in an earlier Passive Monitor session --
+// WifiMonitor no longer clears lastManagementEvent on start(). The
+// channel check below is what decides "--" vs showing it: we prefer
+// the AP's real channel (networkChannel, from the known-AP cache)
+// when known, else fall back to the raw radio channel the frame was
+// received on (receivedChannel).
 void WifiMonitorScreen::drawLastManagementEvent()
 {
   display->setTextSize(1);
