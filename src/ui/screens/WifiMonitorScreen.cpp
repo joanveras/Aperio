@@ -1,4 +1,5 @@
 #include "ui/screens/WifiMonitorScreen.hpp"
+#include "wifi/WifiManagementUtils.hpp"
 
 WifiMonitorScreen::WifiMonitorScreen(
   Adafruit_ILI9341* displayInstance,
@@ -184,14 +185,23 @@ void WifiMonitorScreen::drawScreen()
 void WifiMonitorScreen::drawHeader()
 {
   display->setTextSize(2);
-  display->setTextColor(ILI9341_WHITE);
+  display->setTextColor(
+    ILI9341_WHITE,
+    ILI9341_BLACK
+  );
 
   display->setCursor(10, 10);
   display->print("802.11 MONITOR");
 
   display->setTextSize(1);
 
-  char channelText[16];
+  if (monitor != nullptr && monitor->isPaused())
+  {
+    display->setCursor(205, 14);
+    display->print("PAUSED");
+  }
+
+  char channelText[12];
 
   snprintf(
     channelText,
@@ -202,23 +212,7 @@ void WifiMonitorScreen::drawHeader()
     )
   );
 
-  int16_t x1;
-  int16_t y1;
-  uint16_t width;
-  uint16_t height;
-
-  display->getTextBounds(
-    channelText,
-    0,
-    0,
-    &x1,
-    &y1,
-    &width,
-    &height
-  );
-
-  display->setCursor(display->width() - width - 10,14);
-
+  display->setCursor(278, 14);
   display->print(channelText);
 
   display->drawFastHLine(
@@ -238,95 +232,75 @@ void WifiMonitorScreen::drawStats()
 
   display->setTextSize(1);
 
+  // Frames/s
   display->setCursor(16, 50);
   display->print("Frames/s");
 
   display->setTextSize(2);
 
   display->setCursor(16, 64);
-  display->print(
-    stats.framesPerSecond
-  );
+  display->print(stats.framesPerSecond);
+
+  // Last event
+  drawLastManagementEvent();
 
   display->setTextSize(1);
 
   // Left column
-
-  display->setCursor(16, 98);
+  display->setCursor(16, 100);
   display->print("Total");
 
-  display->setCursor(105, 98);
-  display->print(
-    stats.totalFrames
-  );
+  display->setCursor(105, 100);
+  display->print(stats.totalFrames);
 
   display->setCursor(16, 116);
   display->print("Management");
 
   display->setCursor(105, 116);
-  display->print(
-    stats.managementFrames
-  );
+  display->print(stats.managementFrames);
 
-  display->setCursor(16, 134);
+  display->setCursor(16, 132);
   display->print("Control");
 
-  display->setCursor(105, 134);
-  display->print(
-    stats.controlFrames
-  );
+  display->setCursor(105, 132);
+  display->print(stats.controlFrames);
 
-  display->setCursor(16, 152);
+  display->setCursor(16, 148);
   display->print("Data");
 
-  display->setCursor(105, 152);
-  display->print(
-    stats.dataFrames
-  );
+  display->setCursor(105, 148);
+  display->print(stats.dataFrames);
 
   // Right column
-
-  display->setCursor(178, 98);
+  display->setCursor(178, 100);
   display->print("Beacon");
 
-  display->setCursor(265, 98);
-  display->print(
-    stats.beaconFrames
-  );
+  display->setCursor(265, 100);
+  display->print(stats.beaconFrames);
 
   display->setCursor(178, 116);
   display->print("Probe Req");
 
   display->setCursor(265, 116);
-  display->print(
-    stats.probeRequestFrames
-  );
+  display->print(stats.probeRequestFrames);
 
-  display->setCursor(178, 134);
+  display->setCursor(178, 132);
   display->print("Probe Resp");
 
-  display->setCursor(265, 134);
-  display->print(
-    stats.probeResponseFrames
-  );
+  display->setCursor(265, 132);
+  display->print(stats.probeResponseFrames);
 
-  display->setCursor(178, 152);
+  display->setCursor(178, 148);
   display->print("Deauth");
 
-  display->setCursor(265, 152);
-  display->print(
-    stats.deauthFrames
-  );
+  display->setCursor(265, 148);
+  display->print(stats.deauthFrames);
 
-  if (monitor != nullptr && monitor->isPaused())
-  {
-    drawCentered(
-      "PAUSED",
-      170,
-      1,
-      ILI9341_WHITE
-    );
-  }
+  display->setCursor(178, 164);
+  display->print("Disassoc");
+
+  display->setCursor(265, 164);
+  display->print(stats.disassociationFrames);
 }
 
 void WifiMonitorScreen::drawFooter()
@@ -404,6 +378,72 @@ void WifiMonitorScreen::clearFooterArea()
     55,
     ILI9341_BLACK
   );
+}
+
+void WifiMonitorScreen::drawLastManagementEvent()
+{
+  display->setTextSize(1);
+  display->setTextColor(
+    ILI9341_WHITE,
+    ILI9341_BLACK
+  );
+
+  display->setCursor(178, 50);
+  display->print("LAST EVENT");
+
+  const WifiManagementEvent& event = stats.lastManagementEvent;
+
+  if (!event.valid)
+  {
+    display->setCursor(178, 66);
+    display->print("--");
+    return;
+  }
+
+  bool belongsToCurrentChannel = false;
+
+  if (event.networkChannelKnown)
+  {
+    belongsToCurrentChannel = event.networkChannel == stats.channel;
+  }
+  else
+  {
+    belongsToCurrentChannel = event.receivedChannel == stats.channel;
+  }
+
+  if (!belongsToCurrentChannel)
+  {
+    display->setCursor(178, 66);
+    display->print("--");
+    return;
+  }
+
+  WifiManagementDirection direction =
+    getManagementEventDirection(event);
+
+  display->setCursor(178, 66);
+
+  display->print(
+    wifiManagementEventTypeToString(
+      event.type
+    )
+  );
+
+  display->print(" R");
+  display->print(event.reasonCode);
+
+  display->setCursor(178, 80);
+
+  display->print(
+    wifiManagementDirectionToString(
+      direction
+    )
+  );
+
+  display->print(" ");
+
+  display->print(event.rssi);
+  display->print("dBm");
 }
 
 void WifiMonitorScreen::drawCentered(
