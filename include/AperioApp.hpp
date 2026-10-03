@@ -9,8 +9,13 @@
 #include "ui/screens/PlaceholderScreen.hpp"
 #include "ui/screens/AboutScreen.hpp"
 #include "ui/screens/WifiMenuScreen.hpp"
-#include "ui/screens/WifiScanScreen.hpp"
+#include "ui/screens/WifiMonitorMenuScreen.hpp"
+#include "ui/screens/WifiNetworkListScreen.hpp"
+#include "ui/screens/WifiNetworkDetailScreen.hpp"
+#include "ui/screens/WifiChannelScreen.hpp"
 #include "ui/screens/WifiMonitorScreen.hpp"
+#include "ui/screens/WifiManagementEventScreen.hpp"
+#include "ui/screens/WifiManagementEventsScreen.hpp"
 #include "wifi/WifiScanner.hpp"
 #include "wifi/WifiMonitor.hpp"
 
@@ -37,10 +42,18 @@ private:
     AboutScreen aboutScreen;
 
     WifiMenuScreen wifiScreen;
+    WifiMonitorMenuScreen wifiMonitorMenuScreen;
+
     WifiScanner wifiScanner;
-    WifiScanScreen wifiScanScreen;
+
+    WifiNetworkListScreen wifiNetworkListScreen;
+    WifiNetworkDetailScreen wifiNetworkDetailScreen;
+    WifiChannelScreen wifiChannelScreen;
+
     WifiMonitor wifiMonitor;
     WifiMonitorScreen wifiMonitorScreen;
+    WifiManagementEventScreen wifiManagementEventScreen;
+    WifiManagementEventsScreen wifiManagementEventsScreen;
 
     void showBootScreen();
     void handleNavigation(ScreenId screenId);
