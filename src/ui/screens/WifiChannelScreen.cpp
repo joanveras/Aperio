@@ -1,0 +1,433 @@
+#include "ui/screens/WifiChannelScreen.hpp"
+
+WifiChannelScreen::WifiChannelScreen(
+  Adafruit_ILI9341* displayInstance,
+  WifiScanner* scannerInstance,
+  std::function<void(ScreenId)> navigationCallback
+)
+  : display(displayInstance),
+    scanner(scannerInstance),
+    navigationCallback(navigationCallback)
+{
+}
+
+uint8_t WifiChannelScreen::getSelectedChannel() const
+{
+  return selectedChannel;
+}
+
+void WifiChannelScreen::onEnter()
+{
+  buildChannelStats();
+
+  needsRedraw = true;
+}
+
+void WifiChannelScreen::handleInput(
+  InputEvent event
+)
+{
+  switch (event)
+  {
+    case InputEvent::PREVIOUS:
+      moveSelection(-1);
+      break;
+
+    case InputEvent::NEXT:
+      moveSelection(1);
+      break;
+
+    case InputEvent::SELECT:
+      openSelectedChannel();
+      break;
+
+    default:
+      break;
+  }
+}
+
+void WifiChannelScreen::update()
+{
+}
+
+void WifiChannelScreen::render()
+{
+  if (
+    !needsRedraw || display == nullptr || scanner == nullptr)
+  {
+    return;
+  }
+
+  drawHeader();
+  drawChannels();
+  drawFooter();
+
+  needsRedraw = false;
+}
+
+void WifiChannelScreen::buildChannelStats()
+{
+  for (
+    uint8_t channel = MIN_CHANNEL; channel <= MAX_CHANNEL; channel++
+  )
+  {
+    WifiChannelStats& stats = channelStats[channel - MIN_CHANNEL];
+
+    stats.channel = channel;
+    stats.networkCount = 0;
+    stats.strongestRssi = -127;
+  }
+
+  if (scanner == nullptr)
+  {
+    return;
+  }
+
+  size_t networkCount = scanner->getNetworkCount();
+
+  for (size_t i = 0; i < networkCount; i++)
+  {
+    const WifiNetwork& network = scanner->getNetwork(i);
+
+    if (
+      network.channel < MIN_CHANNEL || network.channel > MAX_CHANNEL
+    )
+    {
+      continue;
+    }
+
+    WifiChannelStats& stats =
+      channelStats[network.channel - MIN_CHANNEL];
+
+    stats.networkCount++;
+
+    if (network.rssi > stats.strongestRssi)
+    {
+      stats.strongestRssi = network.rssi;
+    }
+  }
+}
+
+void WifiChannelScreen::moveSelection(
+  int direction
+)
+{
+  if (direction < 0)
+  {
+    if (selectedChannel == MIN_CHANNEL)
+    {
+      selectedChannel = MAX_CHANNEL;
+    }
+    else
+    {
+      selectedChannel--;
+    }
+  }
+  else
+  {
+    if (selectedChannel == MAX_CHANNEL)
+    {
+      selectedChannel = MIN_CHANNEL;
+    }
+    else
+    {
+      selectedChannel++;
+    }
+  }
+
+  if (selectedChannel < firstVisibleChannel)
+  {
+    firstVisibleChannel = selectedChannel;
+  }
+  else if (
+    selectedChannel >= firstVisibleChannel + VISIBLE_ITEM_COUNT
+  )
+  {
+    firstVisibleChannel =
+      selectedChannel - VISIBLE_ITEM_COUNT + 1;
+  }
+
+  /*
+    Handle wrap-around.
+  */
+  if (selectedChannel == MIN_CHANNEL)
+  {
+    firstVisibleChannel = MIN_CHANNEL;
+  }
+  else if (
+    selectedChannel == MAX_CHANNEL
+  )
+  {
+    firstVisibleChannel = MAX_CHANNEL - VISIBLE_ITEM_COUNT + 1;
+  }
+
+  needsRedraw = true;
+}
+
+void WifiChannelScreen::openSelectedChannel()
+{
+  if (navigationCallback)
+  {
+    navigationCallback(
+      ScreenId::WIFI_MONITOR
+    );
+  }
+}
+
+void WifiChannelScreen::drawHeader()
+{
+  display->fillScreen(
+    ILI9341_BLACK
+  );
+
+  display->setTextWrap(false);
+
+  display->setTextSize(2);
+  display->setTextColor(
+    ILI9341_WHITE
+  );
+
+  display->setCursor(10, 10);
+  display->print("CHANNELS");
+
+  display->setTextSize(1);
+
+  display->setCursor(
+    display->width() - 42,
+    14
+  );
+
+  display->print("2.4G");
+
+  display->drawFastHLine(
+    8,
+    36,
+    display->width() - 16,
+    ILI9341_WHITE
+  );
+}
+
+void WifiChannelScreen::drawChannels()
+{
+  constexpr int16_t START_Y = 52;
+  constexpr int16_t ITEM_SPACING = 26;
+
+  uint8_t lastVisibleChannel =
+    firstVisibleChannel + VISIBLE_ITEM_COUNT - 1;
+
+  if (
+    lastVisibleChannel > MAX_CHANNEL
+  )
+  {
+    lastVisibleChannel = MAX_CHANNEL;
+  }
+
+  int visibleIndex = 0;
+
+  for (
+    uint8_t channel = firstVisibleChannel;
+    channel <= lastVisibleChannel;
+    channel++
+  )
+  {
+    int16_t y = START_Y + (visibleIndex * ITEM_SPACING);
+
+    drawChannelItem(
+      channel,
+      y,
+      channel == selectedChannel
+    );
+
+    visibleIndex++;
+  }
+}
+
+void WifiChannelScreen::drawChannelItem(
+  uint8_t channel,
+  int16_t y,
+  bool selected
+)
+{
+  constexpr int16_t ITEM_X = 12;
+  constexpr int16_t ITEM_WIDTH = 296;
+  constexpr int16_t ITEM_HEIGHT = 22;
+
+  WifiChannelStats& stats = channelStats[channel - MIN_CHANNEL];
+
+  if (selected)
+  {
+    display->fillRect(
+      ITEM_X,
+      y - 5,
+      ITEM_WIDTH,
+      ITEM_HEIGHT,
+      ILI9341_WHITE
+    );
+
+    display->setTextColor(
+      ILI9341_BLACK,
+      ILI9341_WHITE
+    );
+  }
+  else
+  {
+    display->setTextColor(
+      ILI9341_WHITE,
+      ILI9341_BLACK
+    );
+  }
+
+  display->setTextSize(1);
+
+  char channelText[12];
+
+  snprintf(
+    channelText,
+    sizeof(channelText),
+    "CH %u",
+    static_cast<unsigned>(
+      channel
+    )
+  );
+
+  display->setCursor(
+    20,
+    y
+  );
+
+  display->print(
+    channelText
+  );
+
+  char networkText[16];
+
+  snprintf(
+    networkText,
+    sizeof(networkText),
+    "%u AP",
+    static_cast<unsigned>(
+      stats.networkCount
+    )
+  );
+
+  display->setCursor(
+    110,
+    y
+  );
+
+  display->print(
+    networkText
+  );
+
+  display->setCursor(
+    210,
+    y
+  );
+
+  if (stats.networkCount == 0)
+  {
+    display->print("--");
+  }
+  else
+  {
+    display->print(
+      stats.strongestRssi
+    );
+
+    display->print(
+      " dBm"
+    );
+  }
+}
+
+void WifiChannelScreen::drawFooter()
+{
+  display->drawFastHLine(
+    8,
+    184,
+    display->width() - 16,
+    ILI9341_WHITE
+  );
+
+  display->setTextSize(1);
+  display->setTextColor(
+    ILI9341_WHITE
+  );
+
+  display->setCursor(
+    12,
+    198
+  );
+
+  display->print(
+    "< PREV"
+  );
+
+  display->setCursor(
+    154,
+    198
+  );
+
+  display->print(
+    "OK"
+  );
+
+  display->setCursor(
+    272,
+    198
+  );
+
+  display->print(
+    "NEXT >"
+  );
+
+  drawCentered(
+    "HOLD OK : BACK",
+    220,
+    1,
+    ILI9341_WHITE
+  );
+}
+
+void WifiChannelScreen::drawCentered(
+  const char* text,
+  int16_t y,
+  uint8_t textSize,
+  uint16_t color
+)
+{
+  int16_t x1;
+  int16_t y1;
+
+  uint16_t width;
+  uint16_t height;
+
+  display->setTextSize(
+    textSize
+  );
+
+  display->setTextColor(
+    color
+  );
+
+  display->getTextBounds(
+    text,
+    0,
+    0,
+    &x1,
+    &y1,
+    &width,
+    &height
+  );
+
+  int16_t x = (display->width() -width) / 2;
+
+  display->setCursor(
+    x,
+    y
+  );
+
+  display->print(
+    text
+  );
+}
