@@ -46,6 +46,8 @@ private:
   void handleNext();
   void handleSelect();
 
+  void drawLastManagementEvent();
+
   void drawCentered(
     const char* text,
     int16_t y,
