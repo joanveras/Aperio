@@ -30,15 +30,20 @@ private:
 
   uint32_t lastRefreshTime = 0;
 
+  bool monitorStartFailed = false;
+
   bool needsFullRedraw = true;
+  bool needsHeaderRedraw = true;
   bool needsStatsRedraw = true;
   bool needsFooterRedraw = true;
 
   void drawScreen();
   void drawHeader();
   void drawStats();
+  void drawError();
   void drawFooter();
 
+  void clearHeaderArea();
   void clearStatsArea();
   void clearFooterArea();
 
