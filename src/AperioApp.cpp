@@ -30,7 +30,14 @@ AperioApp::AperioApp(
         handleNavigation(screenId);
       }
     ),
-    wifiScanScreen(
+    wifiMonitorMenuScreen(
+      displayInstance,
+      [this](ScreenId screenId)
+      {
+        handleNavigation(screenId);
+      }
+    ),
+    wifiNetworkListScreen(
       displayInstance,
       &wifiScanner,
       [this](ScreenId screenId)
@@ -38,9 +45,38 @@ AperioApp::AperioApp(
         handleNavigation(screenId);
       }
     ),
+    wifiNetworkDetailScreen(
+      displayInstance
+    ),
+    wifiChannelScreen(
+      displayInstance,
+      &wifiScanner,
+      [this](ScreenId screenId)
+      {
+        if (screenId == ScreenId::WIFI_MONITOR)
+        {
+          wifiMonitor.setChannel(
+            wifiChannelScreen.getSelectedChannel()
+          );
+        }
+
+        handleNavigation(screenId);
+      }
+    ),
     wifiMonitorScreen(
       displayInstance,
       &wifiMonitor
+    ),
+    wifiManagementEventScreen(
+      displayInstance
+    ),
+    wifiManagementEventsScreen(
+      displayInstance,
+      &wifiMonitor,
+      [this](ScreenId screenId)
+      {
+        handleNavigation(screenId);
+      }
     )
 {
 }
@@ -136,27 +172,91 @@ void AperioApp::handleNavigation(ScreenId screenId)
       break;
 
     case ScreenId::WIFI_SCAN:
-      wifiScanScreen.startScan();
-      screenManager.setScreen(&wifiScanScreen);
+    {
+      wifiScanner.scan();
+
+      size_t networkCount = wifiScanner.getNetworkCount();
+
+      for (size_t i = 0; i < networkCount; i++)
+      {
+        const WifiNetwork& network =
+          wifiScanner.getNetwork(i);
+
+        wifiMonitor.rememberApChannel(
+          network.bssid,
+          network.channel
+        );
+      }
+
+      wifiNetworkListScreen.setTitle("WI-FI SCAN");
+
+      wifiNetworkListScreen.resetSelection();
+
+      screenManager.setScreen(&wifiNetworkListScreen);
+
       break;
+    }
 
     case ScreenId::WIFI_NETWORKS:
-      placeholderScreen.setTitle("NETWORKS");
-      screenManager.setScreen(&placeholderScreen);
+      wifiNetworkListScreen.setTitle("NETWORKS");
+
+      wifiNetworkListScreen.resetSelection();
+
+      screenManager.setScreen(&wifiNetworkListScreen);
+
       break;
 
     case ScreenId::WIFI_NETWORK_DETAILS:
-      placeholderScreen.setTitle("NETWORK DETAILS");
-      screenManager.setScreen(&placeholderScreen);
+    {
+      const WifiNetwork* network =
+        wifiNetworkListScreen.getSelectedNetwork();
+
+      wifiNetworkDetailScreen.setNetwork(
+        network
+      );
+
+      screenManager.setScreen(
+        &wifiNetworkDetailScreen
+      );
+
       break;
+    }
 
     case ScreenId::WIFI_CHANNELS:
-      placeholderScreen.setTitle("CHANNELS");
-      screenManager.setScreen(&placeholderScreen);
+      screenManager.setScreen(&wifiChannelScreen);
+      break;
+
+    case ScreenId::WIFI_MONITOR_MENU:
+      screenManager.setScreen(&wifiMonitorMenuScreen);
       break;
 
     case ScreenId::WIFI_MONITOR:
       screenManager.setScreen(&wifiMonitorScreen);
+      break;
+
+    case ScreenId::WIFI_MANAGEMENT_EVENTS:
+      screenManager.setScreen(&wifiManagementEventsScreen);
+      break;
+
+    case ScreenId::WIFI_MANAGEMENT_EVENT:
+    {
+      WifiManagementEvent event;
+
+      if (wifiManagementEventsScreen.getSelectedEvent(event))
+      {
+        wifiManagementEventScreen.setEvent(event);
+
+        screenManager.setScreen(&wifiManagementEventScreen);
+      }
+
+      break;
+    }
+
+    case ScreenId::WIFI_ACTIVE_SURVEY:
+      placeholderScreen.setTitle("ACTIVE SURVEY");
+
+      screenManager.setScreen(&placeholderScreen);
+
       break;
 
     case ScreenId::BLUETOOTH_MENU:
