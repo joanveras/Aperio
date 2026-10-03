@@ -3,10 +3,10 @@
 namespace
 {
   constexpr MenuItem mainMenuItems[] = {
-    {"Scan",     ScreenId::WIFI_SCAN},
-    {"Networks", ScreenId::WIFI_NETWORKS},
+    {"Scan",       ScreenId::WIFI_SCAN},
+    {"Networks",   ScreenId::WIFI_NETWORKS},
     {"Channels",   ScreenId::WIFI_CHANNELS},
-    {"Monitor",     ScreenId::WIFI_MONITOR}
+    {"Monitor",    ScreenId::WIFI_MONITOR_MENU}
   };
 
   constexpr int MENU_ITEM_COUNT = sizeof(mainMenuItems) / sizeof(mainMenuItems[0]);
