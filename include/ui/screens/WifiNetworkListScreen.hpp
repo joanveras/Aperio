@@ -19,6 +19,8 @@ public:
   void setTitle(const char* title);
   void resetSelection();
 
+  void setSelectDestination(ScreenId destination);
+
   const WifiNetwork* getSelectedNetwork() const;
 
   void onEnter() override;
@@ -35,6 +37,8 @@ private:
   std::function<void(ScreenId)> navigationCallback;
 
   const char* title = "NETWORKS";
+
+  ScreenId selectDestination = ScreenId::WIFI_NETWORK_DETAILS;
 
   size_t selectedIndex = 0;
   size_t firstVisibleItem = 0;

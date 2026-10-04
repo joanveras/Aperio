@@ -129,7 +129,7 @@ void MainMenuScreen::drawMenuItems()
     ILI9341_WHITE
   );
 
-  // Rodapé
+  // Footer
   display->setTextSize(1);
   display->setTextColor(ILI9341_WHITE);
 

@@ -6,7 +6,8 @@ namespace
     {"Scan",       ScreenId::WIFI_SCAN},
     {"Networks",   ScreenId::WIFI_NETWORKS},
     {"Channels",   ScreenId::WIFI_CHANNELS},
-    {"Monitor",    ScreenId::WIFI_MONITOR_MENU}
+    {"Monitor",    ScreenId::WIFI_MONITOR_MENU},
+    {"TX Lab",     ScreenId::WIFI_TX_SELECT}
   };
 
   constexpr int MENU_ITEM_COUNT = sizeof(mainMenuItems) / sizeof(mainMenuItems[0]);
@@ -70,6 +71,32 @@ void WifiMenuScreen::moveSelection(int direction)
     selectedIndex = 0;
   }
 
+  if (selectedIndex < firstVisibleItem)
+  {
+    firstVisibleItem = selectedIndex;
+  }
+  else if (
+    selectedIndex >= firstVisibleItem + VISIBLE_ITEM_COUNT
+  )
+  {
+    firstVisibleItem = selectedIndex - VISIBLE_ITEM_COUNT + 1;
+  }
+
+  if (selectedIndex == 0)
+  {
+    firstVisibleItem = 0;
+  }
+
+  if (selectedIndex == MENU_ITEM_COUNT - 1)
+  {
+    firstVisibleItem = MENU_ITEM_COUNT - VISIBLE_ITEM_COUNT;
+
+    if (firstVisibleItem < 0)
+    {
+      firstVisibleItem = 0;
+    }
+  }
+
   needsRedraw = true;
 }
 
@@ -106,15 +133,26 @@ void WifiMenuScreen::drawMenuItems()
   constexpr int MENU_START_Y = 52;
   constexpr int ITEM_SPACING = 30;
 
-  for (int i = 0; i < MENU_ITEM_COUNT; i++)
+  int lastVisibleItem = firstVisibleItem + VISIBLE_ITEM_COUNT;
+
+  if (lastVisibleItem > MENU_ITEM_COUNT)
   {
-    int y = MENU_START_Y + (i * ITEM_SPACING);
+    lastVisibleItem = MENU_ITEM_COUNT;
+  }
+
+  int visibleIndex = 0;
+
+  for (int i = firstVisibleItem; i < lastVisibleItem; i++)
+  {
+    int y = MENU_START_Y + (visibleIndex * ITEM_SPACING);
 
     drawMenuItem(
       i,
       y,
       i == selectedIndex
     );
+
+    visibleIndex++;
   }
 
   display->drawFastHLine(
@@ -125,7 +163,9 @@ void WifiMenuScreen::drawMenuItems()
   );
 
   display->setTextSize(1);
-  display->setTextColor(ILI9341_WHITE);
+  display->setTextColor(
+    ILI9341_WHITE
+  );
 
   display->setCursor(12, 198);
   display->print("< PREV");
@@ -138,8 +178,11 @@ void WifiMenuScreen::drawMenuItems()
 
   const char* backText = "HOLD OK : BACK";
 
-  int16_t x1, y1;
-  uint16_t width, height;
+  int16_t x1;
+  int16_t y1;
+
+  uint16_t width;
+  uint16_t height;
 
   display->getTextBounds(
     backText,
@@ -153,8 +196,14 @@ void WifiMenuScreen::drawMenuItems()
 
   int16_t x = (display->width() - width) / 2;
 
-  display->setCursor(x, 220);
-  display->print(backText);
+  display->setCursor(
+    x,
+    220
+  );
+
+  display->print(
+    backText
+  );
 }
 
 void WifiMenuScreen::drawMenuItem(

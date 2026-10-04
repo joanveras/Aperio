@@ -16,6 +16,8 @@
 #include "ui/screens/WifiMonitorScreen.hpp"
 #include "ui/screens/WifiManagementEventScreen.hpp"
 #include "ui/screens/WifiManagementEventsScreen.hpp"
+#include "ui/screens/TxLabScreen.hpp"
+#include "wifi/WifiTransmitter.hpp"
 #include "wifi/WifiScanner.hpp"
 #include "wifi/WifiMonitor.hpp"
 
@@ -54,6 +56,9 @@ private:
     WifiMonitorScreen wifiMonitorScreen;
     WifiManagementEventScreen wifiManagementEventScreen;
     WifiManagementEventsScreen wifiManagementEventsScreen;
+
+    WifiTransmitter wifiTransmitter;
+    TxLabScreen txLabScreen;
 
     void showBootScreen();
     void handleNavigation(ScreenId screenId);

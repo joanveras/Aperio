@@ -77,6 +77,10 @@ AperioApp::AperioApp(
       {
         handleNavigation(screenId);
       }
+    ),
+    txLabScreen(
+      displayInstance,
+      &wifiTransmitter
     )
 {
 }
@@ -190,6 +194,10 @@ void AperioApp::handleNavigation(ScreenId screenId)
 
       wifiNetworkListScreen.setTitle("WI-FI SCAN");
 
+      wifiNetworkListScreen.setSelectDestination(
+        ScreenId::WIFI_NETWORK_DETAILS
+      );
+
       wifiNetworkListScreen.resetSelection();
 
       screenManager.setScreen(&wifiNetworkListScreen);
@@ -199,6 +207,10 @@ void AperioApp::handleNavigation(ScreenId screenId)
 
     case ScreenId::WIFI_NETWORKS:
       wifiNetworkListScreen.setTitle("NETWORKS");
+
+      wifiNetworkListScreen.setSelectDestination(
+        ScreenId::WIFI_NETWORK_DETAILS
+      );
 
       wifiNetworkListScreen.resetSelection();
 
@@ -258,6 +270,58 @@ void AperioApp::handleNavigation(ScreenId screenId)
       screenManager.setScreen(&placeholderScreen);
 
       break;
+
+    case ScreenId::WIFI_TX_SELECT:
+    {
+      wifiScanner.scan();
+
+      size_t networkCount =
+        wifiScanner.getNetworkCount();
+
+      for (size_t i = 0; i < networkCount; i++)
+      {
+        const WifiNetwork& network =
+          wifiScanner.getNetwork(i);
+
+        wifiMonitor.rememberApChannel(
+          network.bssid,
+          network.channel
+        );
+      }
+
+      wifiNetworkListScreen.setTitle(
+        "TX TARGET"
+      );
+
+      wifiNetworkListScreen.setSelectDestination(
+        ScreenId::WIFI_TX_LAB
+      );
+
+      wifiNetworkListScreen.resetSelection();
+
+      screenManager.setScreen(
+        &wifiNetworkListScreen
+      );
+
+      break;
+    }
+
+    case ScreenId::WIFI_TX_LAB:
+    {
+      const WifiNetwork* network =
+        wifiNetworkListScreen.getSelectedNetwork();
+
+      if (network == nullptr)
+      {
+        break;
+      }
+
+      txLabScreen.setTarget(*network);
+
+      screenManager.setScreen(&txLabScreen);
+
+      break;
+    }
 
     case ScreenId::BLUETOOTH_MENU:
       placeholderScreen.setTitle("BLUETOOTH");

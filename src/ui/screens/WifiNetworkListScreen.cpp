@@ -30,6 +30,13 @@ void WifiNetworkListScreen::resetSelection()
   needsRedraw = true;
 }
 
+void WifiNetworkListScreen::setSelectDestination(
+  ScreenId destination
+)
+{
+  selectDestination = destination;
+}
+
 void WifiNetworkListScreen::onEnter()
 {
   if (scanner == nullptr)
@@ -146,7 +153,7 @@ void WifiNetworkListScreen::openSelectedNetwork()
   if (navigationCallback)
   {
     navigationCallback(
-      ScreenId::WIFI_NETWORK_DETAILS
+      selectDestination
     );
   }
 }
