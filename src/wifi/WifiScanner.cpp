@@ -34,6 +34,8 @@ void WifiScanner::scan()
     networks[i].rssi = WiFi.RSSI(i);
     networks[i].channel = WiFi.channel(i);
     networks[i].security = WiFi.encryptionType(i);
+
+    networks[i].pmf =WifiPmfMode::PMF_UNKNOWN;
   }
 
   networkCount = storedCount;
