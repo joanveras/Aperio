@@ -30,46 +30,10 @@ namespace UiColor
   constexpr uint16_t DANGER = rgb(240, 84, 96);
 }
 
-// Fonts used by the "chrome" of the UI: titles, menu items and the larger
-// messages. They are Cascadia Mono, converted to the Adafruit GFX format
-// (see include/ui/fonts/CascadiaMono.h). Defined once in UiStyle.cpp.
-//
-// Dense tabular screens (lists, the monitor stats grid) still use the
-// built-in 5x7 font: Cascadia at this size is taller and a little wider than
-// the 6px built-in glyphs, and those columns are laid out for the built-in
-// metrics. Because Cascadia is monospaced, moving them over later is mostly
-// a matter of re-spacing the columns rather than measuring each string.
-namespace UiFont
-{
-  extern const GFXfont* TITLE;  // screen titles
-  extern const GFXfont* ITEM;   // menu item labels, emphasis
-  extern const GFXfont* BODY;   // larger body text with room to breathe
-}
-
 namespace UiStyle
 {
-  // Draws `text` in `font` with its top-left corner at (x, topY). Restores
-  // the built-in font afterwards, so callers can keep using the default.
-  void text(
-    Adafruit_ILI9341* display,
-    const GFXfont* font,
-    int16_t x,
-    int16_t topY,
-    uint16_t color,
-    const char* text
-  );
-
-  // Same, horizontally centered on the screen.
-  void textCentered(
-    Adafruit_ILI9341* display,
-    const GFXfont* font,
-    int16_t topY,
-    uint16_t color,
-    const char* text
-  );
-
-  // Screen title at the top left, underlined by a short cyan dash that
-  // fades into a thin divider across the screen.
+  // Screen title at the top left (text size 2), underlined by a short cyan
+  // dash that fades into a thin divider across the screen.
   void drawTitle(Adafruit_ILI9341* display, const char* title);
 
   // Thin horizontal divider across the screen.

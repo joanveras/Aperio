@@ -217,14 +217,22 @@ void WifiMenuScreen::drawMenuItem(
       ITEM_WIDTH,
       ITEM_HEIGHT
     );
+
+    display->setTextColor(
+      UiColor::TEXT,
+      UiColor::SELECTION
+    );
+  }
+  else
+  {
+    display->setTextColor(
+      UiColor::TEXT_MUTED,
+      UiColor::BACKGROUND
+    );
   }
 
-  UiStyle::text(
-    display,
-    UiFont::ITEM,
-    TEXT_X,
-    y,
-    selected ? UiColor::TEXT : UiColor::TEXT_MUTED,
-    mainMenuItems[index].label
-  );
+  display->setTextSize(2);
+  display->setCursor(TEXT_X, y);
+
+  display->print(mainMenuItems[index].label);
 }
