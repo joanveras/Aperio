@@ -46,6 +46,8 @@ struct MascotPose
   float waveRadius = 38.0f;   // radius of the innermost arc (logical px)
   float waveSpacing = 7.0f;   // distance between arcs (logical px)
   float waveSpan = 0.5f;      // half angle of each arc (radians)
+  float waveSpanVar = 0.0f;   // 0 = every arc the same length; >0 shortens
+                              // some arcs so sizes vary within a frame
   float waveAmpLeft = 1.0f;   // 0..1 per side, lets one side react alone
   float waveAmpRight = 1.0f;
   float wavePhase = 0.0f;     // grows with time; one unit = one cycle

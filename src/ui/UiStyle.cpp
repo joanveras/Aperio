@@ -14,7 +14,11 @@ namespace
   constexpr int16_t SELECTION_BAR_WIDTH = 3;
 }
 
-void UiStyle::drawTitle(Adafruit_ILI9341* display, const char* title)
+void UiStyle::drawTitle(
+  Adafruit_ILI9341* display,
+  const char* title,
+  int16_t ruleEndX
+)
 {
   display->setTextWrap(false);
   display->setTextSize(2);
@@ -30,12 +34,20 @@ void UiStyle::drawTitle(Adafruit_ILI9341* display, const char* title)
     UiColor::ACCENT
   );
 
-  display->drawFastHLine(
-    TITLE_X + RULE_ACCENT_WIDTH + 2,
-    RULE_Y + 1,
-    display->width() - TITLE_X - RULE_ACCENT_WIDTH - 2 - RULE_MARGIN,
-    UiColor::LINE
-  );
+  const int16_t lineStart = TITLE_X + RULE_ACCENT_WIDTH + 2;
+  const int16_t lineEnd = (ruleEndX >= 0)
+    ? ruleEndX
+    : display->width() - RULE_MARGIN;
+
+  if (lineEnd > lineStart)
+  {
+    display->drawFastHLine(
+      lineStart,
+      RULE_Y + 1,
+      lineEnd - lineStart,
+      UiColor::LINE
+    );
+  }
 }
 
 void UiStyle::drawDivider(Adafruit_ILI9341* display, int16_t y)

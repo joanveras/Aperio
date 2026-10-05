@@ -12,6 +12,11 @@ namespace
   };
 
   constexpr int MENU_ITEM_COUNT = sizeof(mainMenuItems) / sizeof(mainMenuItems[0]);
+
+  // Same top-right corner as the main menu, for a consistent companion.
+  constexpr int16_t MASCOT_X = 206;
+  constexpr int16_t MASCOT_Y = 0;
+  constexpr int16_t RULE_END_X = 200;
 }
 
 WifiMenuScreen::WifiMenuScreen(
@@ -22,40 +27,60 @@ WifiMenuScreen::WifiMenuScreen(
     navigationCallback(navigationCallback),
     selectedIndex(0),
     firstVisibleItem(0),
-    needsRedraw(true)
+    needsRedraw(true),
+    mascot(displayInstance, MASCOT_X, MASCOT_Y),
+    mascotFrameDue(false)
 {
 }
 
 void WifiMenuScreen::onEnter()
 {
   needsRedraw = true;
+  mascot.begin(millis());
 }
 
 void WifiMenuScreen::handleInput(InputEvent event)
 {
   if (event == InputEvent::PREVIOUS)
+  {
     moveSelection(-1);
+    mascot.glance(-1, millis());
+  }
   else if (event == InputEvent::NEXT)
+  {
     moveSelection(1);
+    mascot.glance(1, millis());
+  }
   else if (event == InputEvent::SELECT)
+  {
     openSelectedItem();
+  }
 }
 
 void WifiMenuScreen::update()
 {
+  mascotFrameDue = mascot.update(millis());
 }
 
 void WifiMenuScreen::render()
 {
-  if (!needsRedraw)
+  bool fullRedraw = needsRedraw;
+
+  if (needsRedraw)
   {
-    return;
+    drawHeader();
+    drawMenuItems();
+
+    needsRedraw = false;
   }
 
-  drawHeader();
-  drawMenuItems();
-
-  needsRedraw = false;
+  // Drawn last, so a full redraw never erases it; on its own it repaints
+  // only its small corner.
+  if (fullRedraw || mascotFrameDue)
+  {
+    mascot.present();
+    mascotFrameDue = false;
+  }
 }
 
 void WifiMenuScreen::moveSelection(int direction)
@@ -115,7 +140,7 @@ void WifiMenuScreen::drawHeader()
 {
   display->fillScreen(UiColor::BACKGROUND);
 
-  UiStyle::drawTitle(display, "WI-FI");
+  UiStyle::drawTitle(display, "WI-FI", RULE_END_X);
 }
 
 void WifiMenuScreen::drawMenuItems()
