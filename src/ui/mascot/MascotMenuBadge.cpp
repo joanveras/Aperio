@@ -114,13 +114,24 @@ bool MascotMenuBadge::update(uint32_t now)
   pose.gazeY = 0.0f;
   pose.ringRotation = now * RING_TURNS_PER_MS;
 
+  // Irregular, organic waves: each side's strength and the ring radius drift
+  // on their own, from layered oscillations whose periods don't line up, so
+  // the pattern never settles into a clean, even, symmetric ring.
+  const float ts = now * 0.001f;
+
   pose.waveMode = WaveMode::BREATHE;
   pose.waveIntensity = WAVE_INTENSITY;
-  pose.waveRadius = WAVE_RADIUS;
-  pose.waveSpacing = WAVE_SPACING;
   pose.waveSpan = WAVE_SPAN;
-  pose.waveAmpLeft = 1.0f;
-  pose.waveAmpRight = 1.0f;
+  pose.waveSpacing = WAVE_SPACING;
+  pose.waveRadius = WAVE_RADIUS + 1.5f * sinf(ts * 1.3f + 0.7f);
+  pose.waveAmpLeft = clampf(
+    0.75f + 0.35f * sinf(ts * 1.70f) + 0.18f * sinf(ts * 0.73f + 1.9f),
+    0.2f, 1.15f
+  );
+  pose.waveAmpRight = clampf(
+    0.75f + 0.35f * sinf(ts * 1.21f + 2.4f) + 0.18f * sinf(ts * 2.11f + 0.6f),
+    0.2f, 1.15f
+  );
   pose.wavePhase = now * WAVE_PHASE_PER_MS;
 
   return (now - lastFrame) >= FRAME_INTERVAL_MS;
