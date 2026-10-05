@@ -12,9 +12,7 @@ public:
     Adafruit_ILI9341* displayInstance
   );
 
-  void setNetwork(
-    const WifiNetwork* networkInstance
-  );
+  void setNetwork(const WifiNetwork& networkInstance);
 
   void onEnter() override;
   void handleInput(InputEvent event) override;
@@ -23,7 +21,8 @@ public:
 
 private:
   Adafruit_ILI9341* display;
-  const WifiNetwork* network = nullptr;
+  WifiNetwork network;
+  bool hasNetwork = false;
 
   bool needsRedraw = true;
 
