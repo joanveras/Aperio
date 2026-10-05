@@ -1,4 +1,5 @@
 #include "ui/screens/PlaceholderScreen.hpp"
+#include "ui/UiStyle.hpp"
 
 PlaceholderScreen::PlaceholderScreen(
   Adafruit_ILI9341* displayInstance
@@ -36,57 +37,41 @@ void PlaceholderScreen::render()
     return;
   }
 
-  display->fillScreen(ILI9341_BLACK);
-  display->setTextWrap(false);
+  display->fillScreen(UiColor::BACKGROUND);
 
   // Header
-  display->setTextSize(2);
-  display->setTextColor(ILI9341_WHITE);
-  display->setCursor(10, 10);
-  display->print(title);
-
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawTitle(display, title);
 
   // Content
   drawCentered(
     "UNDER DEVELOPMENT",
     92,
     2,
-    ILI9341_WHITE
+    UiColor::ACCENT
   );
 
   drawCentered(
     "Feature not yet",
     132,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_MUTED
   );
 
   drawCentered(
     "implemented",
     148,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_MUTED
   );
 
   // Footer
-  display->drawFastHLine(
-    8,
-    199,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 199);
 
   drawCentered(
     "HOLD OK : BACK",
     216,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 
   needsRedraw = false;

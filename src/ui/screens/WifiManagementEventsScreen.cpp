@@ -1,6 +1,7 @@
 #include "ui/screens/WifiManagementEventsScreen.hpp"
 
 #include "wifi/WifiManagementUtils.hpp"
+#include "ui/UiStyle.hpp"
 
 WifiManagementEventsScreen::WifiManagementEventsScreen(
   Adafruit_ILI9341* displayInstance,
@@ -64,7 +65,7 @@ void WifiManagementEventsScreen::render()
   }
 
   display->fillScreen(
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 
   display->setTextWrap(false);
@@ -174,18 +175,7 @@ void WifiManagementEventsScreen::openSelectedEvent()
 
 void WifiManagementEventsScreen::drawHeader()
 {
-  display->setTextSize(2);
-
-  display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
-  );
-
-  display->setCursor(10, 10);
-
-  display->print(
-    "MANAGEMENT EVENTS"
-  );
+  UiStyle::drawTitle(display, "MANAGEMENT EVENTS");
 
   size_t eventCount = monitor->getManagementEventCount();
 
@@ -207,6 +197,11 @@ void WifiManagementEventsScreen::drawHeader()
   }
 
   display->setTextSize(1);
+
+  display->setTextColor(
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
+  );
 
   int16_t x1;
   int16_t y1;
@@ -233,12 +228,6 @@ void WifiManagementEventsScreen::drawHeader()
 
   display->print(counter);
 
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
 }
 
 void WifiManagementEventsScreen::drawEvents()
@@ -251,7 +240,7 @@ void WifiManagementEventsScreen::drawEvents()
       "NO EVENTS CAPTURED",
       105,
       2,
-      ILI9341_WHITE
+      UiColor::TEXT_MUTED
     );
 
     return;
@@ -303,24 +292,24 @@ void WifiManagementEventsScreen::drawEventItem(
 
   if (selected)
   {
-    display->fillRect(
+    UiStyle::drawSelection(
+      display,
       ITEM_X,
       y - 5,
       ITEM_WIDTH,
-      ITEM_HEIGHT,
-      ILI9341_WHITE
+      ITEM_HEIGHT
     );
 
     display->setTextColor(
-      ILI9341_BLACK,
-      ILI9341_WHITE
+      UiColor::TEXT,
+      UiColor::SELECTION
     );
   }
   else
   {
     display->setTextColor(
-      ILI9341_WHITE,
-      ILI9341_BLACK
+      UiColor::TEXT_MUTED,
+      UiColor::BACKGROUND
     );
   }
 
@@ -391,18 +380,13 @@ void WifiManagementEventsScreen::drawEventItem(
 
 void WifiManagementEventsScreen::drawFooter()
 {
-  display->drawFastHLine(
-    8,
-    184,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 184);
 
   display->setTextSize(1);
 
   display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(
@@ -436,7 +420,7 @@ void WifiManagementEventsScreen::drawFooter()
     "HOLD OK : BACK",
     220,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 }
 
@@ -459,7 +443,7 @@ void WifiManagementEventsScreen::drawCentered(
 
   display->setTextColor(
     color,
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 
   display->getTextBounds(

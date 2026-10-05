@@ -138,6 +138,8 @@ private:
     bool selected
   );
 
+  uint16_t statusColor() const;
+
   void drawCentered(
     const char* text,
     int16_t y,

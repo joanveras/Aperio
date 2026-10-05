@@ -1,4 +1,5 @@
 #include "ui/screens/WifiMonitorMenuScreen.hpp"
+#include "ui/UiStyle.hpp"
 
 namespace
 {
@@ -65,7 +66,7 @@ void WifiMonitorMenuScreen::render()
   }
 
   display->fillScreen(
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 
   display->setTextWrap(false);
@@ -119,28 +120,7 @@ void WifiMonitorMenuScreen::selectCurrentItem()
 
 void WifiMonitorMenuScreen::drawHeader()
 {
-  display->setTextSize(2);
-
-  display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
-  );
-
-  display->setCursor(
-    10,
-    10
-  );
-
-  display->print(
-    "MONITOR"
-  );
-
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawTitle(display, "MONITOR");
 }
 
 void WifiMonitorMenuScreen::drawMenuItems()
@@ -166,9 +146,9 @@ void WifiMonitorMenuScreen::drawMenuItem(
   bool selected
 )
 {
-  constexpr int16_t ITEM_X = 20;
-  constexpr int16_t ITEM_WIDTH = 280;
-  constexpr int16_t ITEM_HEIGHT = 26;
+  constexpr int16_t ITEM_X = 12;
+  constexpr int16_t ITEM_WIDTH = 296;
+  constexpr int16_t ITEM_HEIGHT = 27;
 
   if (index >= MENU_ITEM_COUNT)
   {
@@ -177,31 +157,31 @@ void WifiMonitorMenuScreen::drawMenuItem(
 
   if (selected)
   {
-    display->fillRect(
+    UiStyle::drawSelection(
+      display,
       ITEM_X,
-      y - 6,
+      y - 5,
       ITEM_WIDTH,
-      ITEM_HEIGHT,
-      ILI9341_WHITE
+      ITEM_HEIGHT
     );
 
     display->setTextColor(
-      ILI9341_BLACK,
-      ILI9341_WHITE
+      UiColor::TEXT,
+      UiColor::SELECTION
     );
   }
   else
   {
     display->setTextColor(
-      ILI9341_WHITE,
-      ILI9341_BLACK
+      UiColor::TEXT_MUTED,
+      UiColor::BACKGROUND
     );
   }
 
-  display->setTextSize(1);
+  display->setTextSize(2);
 
   display->setCursor(
-    32,
+    20,
     y
   );
 
@@ -212,18 +192,13 @@ void WifiMonitorMenuScreen::drawMenuItem(
 
 void WifiMonitorMenuScreen::drawFooter()
 {
-  display->drawFastHLine(
-    8,
-    184,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 184);
 
   display->setTextSize(1);
 
   display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(
@@ -257,7 +232,7 @@ void WifiMonitorMenuScreen::drawFooter()
     "HOLD OK : BACK",
     220,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 }
 
@@ -280,7 +255,7 @@ void WifiMonitorMenuScreen::drawCentered(
 
   display->setTextColor(
     color,
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 
   display->getTextBounds(

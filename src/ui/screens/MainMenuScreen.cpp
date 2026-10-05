@@ -1,4 +1,5 @@
 #include "../../../include/ui/screens/MainMenuScreen.hpp"
+#include "ui/UiStyle.hpp"
 
 namespace
 {
@@ -85,25 +86,14 @@ void MainMenuScreen::openSelectedItem()
 
 void MainMenuScreen::drawHeader()
 {
-  display->fillScreen(ILI9341_BLACK);
+  display->fillScreen(UiColor::BACKGROUND);
 
-  display->setTextWrap(false);
-
-  display->setTextSize(2);
-  display->setTextColor(ILI9341_WHITE);
-  display->setCursor(10, 10);
-  display->print("APERIO");
+  UiStyle::drawTitle(display, "APERIO");
 
   display->setTextSize(1);
+  display->setTextColor(UiColor::TEXT_DIM, UiColor::BACKGROUND);
   display->setCursor(286, 14);
   display->print("v0.1");
-
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
 }
 
 void MainMenuScreen::drawMenuItems()
@@ -122,16 +112,11 @@ void MainMenuScreen::drawMenuItems()
     );
   }
 
-  display->drawFastHLine(
-    8,
-    199,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 199);
 
   // Footer
   display->setTextSize(1);
-  display->setTextColor(ILI9341_WHITE);
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
 
   display->setCursor(12, 216);
   display->print("< PREV");
@@ -152,24 +137,24 @@ void MainMenuScreen::drawMenuItem(int index, int y, bool selected)
 
   if (selected)
   {
-    display->fillRect(
+    UiStyle::drawSelection(
+      display,
       ITEM_X,
       y - 5,
       ITEM_WIDTH,
-      ITEM_HEIGHT,
-      ILI9341_WHITE
+      ITEM_HEIGHT
     );
 
     display->setTextColor(
-      ILI9341_BLACK,
-      ILI9341_WHITE
+      UiColor::TEXT,
+      UiColor::SELECTION
     );
   }
   else
   {
     display->setTextColor(
-      ILI9341_WHITE,
-      ILI9341_BLACK
+      UiColor::TEXT_MUTED,
+      UiColor::BACKGROUND
     );
   }
 

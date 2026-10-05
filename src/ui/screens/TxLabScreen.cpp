@@ -1,4 +1,5 @@
 #include "ui/screens/TxLabScreen.hpp"
+#include "ui/UiStyle.hpp"
 
 constexpr WifiReasonCode TxLabScreen::REASON_CODES[];
 
@@ -406,7 +407,7 @@ const WifiReasonCode& TxLabScreen::getSelectedReasonCode() const
 void TxLabScreen::drawScreen()
 {
   display->fillScreen(
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 
   display->setTextWrap(false);
@@ -427,19 +428,12 @@ void TxLabScreen::drawScreen()
 
 void TxLabScreen::drawHeader()
 {
-  display->setTextSize(2);
+  UiStyle::drawTitle(display, "TX LAB");
 
+  display->setTextSize(1);
   display->setTextColor(
-    ILI9341_WHITE
-  );
-
-  display->setCursor(
-    10,
-    10
-  );
-
-  display->print(
-    "TX LAB"
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   if (
@@ -487,12 +481,7 @@ void TxLabScreen::drawHeader()
     );
   }
 
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+
 }
 
 void TxLabScreen::drawContent()
@@ -502,10 +491,6 @@ void TxLabScreen::drawContent()
 
   display->setTextSize(1);
 
-  display->setTextColor(
-    ILI9341_WHITE
-  );
-
   /*
    * Network
   */
@@ -514,6 +499,7 @@ void TxLabScreen::drawContent()
     50
   );
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->print(
     "Network"
   );
@@ -527,6 +513,7 @@ void TxLabScreen::drawContent()
     ssid = ssid.substring( 0, MAX_SSID_LENGTH - 3) + "...";
   }
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(
     VALUE_X,
     50
@@ -544,10 +531,12 @@ void TxLabScreen::drawContent()
     68
   );
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->print(
     "BSSID"
   );
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(
     VALUE_X,
     68
@@ -565,10 +554,12 @@ void TxLabScreen::drawContent()
     90
   );
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->print(
     "Payload"
   );
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(
     VALUE_X,
     90
@@ -599,6 +590,7 @@ void TxLabScreen::drawContent()
       "Reason"
     );
 
+    display->setTextColor(UiColor::TEXT_DIM, UiColor::BACKGROUND);
     display->setCursor(
       VALUE_X,
       113
@@ -613,8 +605,8 @@ void TxLabScreen::drawContent()
    * Status
   */
   display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(
@@ -626,6 +618,7 @@ void TxLabScreen::drawContent()
     "Status"
   );
 
+  display->setTextColor(statusColor(), UiColor::BACKGROUND);
   display->setCursor(
     VALUE_X,
     138
@@ -676,10 +669,12 @@ void TxLabScreen::drawContent()
     160
   );
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->print(
     "Sent"
   );
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(
     VALUE_X,
     160
@@ -694,10 +689,12 @@ void TxLabScreen::drawContent()
     160
   );
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->print(
     "Failed"
   );
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(
     235,
     160
@@ -706,6 +703,21 @@ void TxLabScreen::drawContent()
   display->print(
     stats.failedFrames
   );
+}
+
+uint16_t TxLabScreen::statusColor() const
+{
+  if (hasSendResult && !lastSendSucceeded)
+  {
+    return UiColor::DANGER;
+  }
+
+  if (hasSendResult && lastSendSucceeded)
+  {
+    return UiColor::ACCENT;
+  }
+
+  return UiColor::TEXT;
 }
 
 void TxLabScreen::drawReasonCode(int16_t y, bool selected)
@@ -721,24 +733,24 @@ void TxLabScreen::drawReasonCode(int16_t y, bool selected)
 
   if (selected)
   {
-    display->fillRect(
+    UiStyle::drawSelection(
+      display,
       ITEM_X,
       y,
       ITEM_WIDTH,
-      ITEM_HEIGHT,
-      ILI9341_WHITE
+      ITEM_HEIGHT
     );
 
     display->setTextColor(
-      ILI9341_BLACK,
-      ILI9341_WHITE
+      UiColor::TEXT,
+      UiColor::SELECTION
     );
   }
   else
   {
     display->setTextColor(
-      ILI9341_WHITE,
-      ILI9341_BLACK
+      UiColor::ACCENT,
+      UiColor::BACKGROUND
     );
   }
 
@@ -790,24 +802,20 @@ void TxLabScreen::drawReasonCode(int16_t y, bool selected)
   );
 
   display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
+    UiColor::TEXT,
+    UiColor::BACKGROUND
   );
 }
 
 void TxLabScreen::drawFooter()
 {
-  display->drawFastHLine(
-    8,
-    184,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 184);
 
   display->setTextSize(1);
 
   display->setTextColor(
-    ILI9341_WHITE
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(
@@ -841,7 +849,7 @@ void TxLabScreen::drawFooter()
     centerText,
     198,
     1,
-    ILI9341_WHITE
+    UiColor::ACCENT
   );
 
   display->setCursor(
@@ -857,7 +865,7 @@ void TxLabScreen::drawFooter()
     "HOLD OK : BACK",
     220,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 }
 
@@ -869,7 +877,7 @@ void TxLabScreen::drawError()
       "INVALID TARGET",
       88,
       2,
-      ILI9341_WHITE
+      UiColor::DANGER
     );
 
     if (hasTarget && targetNetwork.ssid.isEmpty())
@@ -878,7 +886,7 @@ void TxLabScreen::drawError()
         "HIDDEN SSID NOT SUPPORTED",
         120,
         1,
-        ILI9341_WHITE
+        UiColor::TEXT_MUTED
       );
     }
     else
@@ -887,7 +895,7 @@ void TxLabScreen::drawError()
         "SELECT A VALID NETWORK",
         120,
         1,
-        ILI9341_WHITE
+        UiColor::TEXT_MUTED
       );
     }
 
@@ -900,14 +908,14 @@ void TxLabScreen::drawError()
       "TX ERROR",
       88,
       2,
-      ILI9341_WHITE
+      UiColor::DANGER
     );
 
     drawCentered(
       "FAILED TO INITIALIZE",
       120,
       1,
-      ILI9341_WHITE
+      UiColor::TEXT_MUTED
     );
   }
 }

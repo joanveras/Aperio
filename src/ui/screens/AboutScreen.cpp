@@ -1,4 +1,5 @@
 #include "ui/screens/AboutScreen.hpp"
+#include "ui/UiStyle.hpp"
 
 AboutScreen::AboutScreen(Adafruit_ILI9341* displayInstance)
   : display(displayInstance),
@@ -27,52 +28,44 @@ void AboutScreen::render()
     return;
   }
 
-  display->fillScreen(ILI9341_BLACK);
-  display->setTextWrap(false);
+  display->fillScreen(UiColor::BACKGROUND);
 
-  display->setTextSize(2);
-  display->setTextColor(ILI9341_WHITE);
-  display->setCursor(10, 10);
-  display->print("ABOUT");
-
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawTitle(display, "ABOUT");
 
   drawCentered(
     "APERIO",
     58,
     2,
-    ILI9341_WHITE
+    UiColor::TEXT
   );
 
   drawCentered(
     "Quod Latet",
     82,
     1,
-    ILI9341_WHITE
+    UiColor::ACCENT
   );
 
   display->setTextSize(1);
-  display->setTextColor(ILI9341_WHITE);
+
+  display->setTextColor(UiColor::TEXT_MUTED);
 
   display->setCursor(34, 112);
   display->print("Firmware");
 
-  display->setCursor(180, 112);
-  display->print("v0.1");
-
   display->setCursor(34, 132);
   display->print("Platform");
 
-  display->setCursor(180, 132);
-  display->print("ESP32");
-
   display->setCursor(34, 152);
   display->print("Display");
+
+  display->setTextColor(UiColor::TEXT);
+
+  display->setCursor(180, 112);
+  display->print("v0.1");
+
+  display->setCursor(180, 132);
+  display->print("ESP32");
 
   display->setCursor(180, 152);
   display->print("ILI9341 320x240");
@@ -81,21 +74,16 @@ void AboutScreen::render()
     "github.com/joanveras/Aperio",
     184,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 
-  display->drawFastHLine(
-    8,
-    204,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 204);
 
   drawCentered(
     "HOLD OK : BACK",
     220,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 
   needsRedraw = false;

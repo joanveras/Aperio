@@ -1,6 +1,7 @@
 #include "ui/screens/WifiManagementEventScreen.hpp"
 
 #include "wifi/WifiManagementUtils.hpp"
+#include "ui/UiStyle.hpp"
 
 WifiManagementEventScreen::WifiManagementEventScreen(
   Adafruit_ILI9341* displayInstance
@@ -41,7 +42,7 @@ void WifiManagementEventScreen::render()
     return;
   }
 
-  display->fillScreen(ILI9341_BLACK);
+  display->fillScreen(UiColor::BACKGROUND);
   display->setTextWrap(false);
 
   drawHeader();
@@ -56,7 +57,7 @@ void WifiManagementEventScreen::render()
       "NO EVENT AVAILABLE",
       105,
       2,
-      ILI9341_WHITE
+      UiColor::TEXT_MUTED
     );
   }
 
@@ -67,21 +68,7 @@ void WifiManagementEventScreen::render()
 
 void WifiManagementEventScreen::drawHeader()
 {
-  display->setTextSize(2);
-  display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
-  );
-
-  display->setCursor(10, 10);
-  display->print("MANAGEMENT EVENT");
-
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawTitle(display, "MANAGEMENT EVENT");
 }
 
 void WifiManagementEventScreen::drawEvent()
@@ -93,15 +80,13 @@ void WifiManagementEventScreen::drawEvent()
     getManagementEventDirection(event);
 
   display->setTextSize(1);
-  display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
-  );
 
   // Type
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(LABEL_X, 46);
   display->print("Type");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(VALUE_X, 46);
   display->print(
     wifiManagementEventTypeToString(
@@ -110,9 +95,11 @@ void WifiManagementEventScreen::drawEvent()
   );
 
   // Direction
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(LABEL_X, 60);
   display->print("Direction");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(VALUE_X, 60);
   display->print(
     wifiManagementDirectionToString(
@@ -121,9 +108,11 @@ void WifiManagementEventScreen::drawEvent()
   );
 
   // Reason
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(LABEL_X, 76);
   display->print("Reason");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(VALUE_X, 76);
   display->print(
     event.reasonCode
@@ -137,9 +126,11 @@ void WifiManagementEventScreen::drawEvent()
   );
 
   // RSSI
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(LABEL_X, 96);
   display->print("RSSI");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(VALUE_X, 96);
   display->print(
     event.rssi
@@ -147,9 +138,11 @@ void WifiManagementEventScreen::drawEvent()
   display->print(" dBm");
 
   // Network channel
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(LABEL_X, 110);
   display->print("Network CH");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(VALUE_X, 110);
 
   if (event.networkChannelKnown)
@@ -164,9 +157,11 @@ void WifiManagementEventScreen::drawEvent()
   }
 
   // Received channel
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(LABEL_X, 124);
   display->print("Received CH");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(VALUE_X, 124);
   display->print(
     event.receivedChannel
@@ -222,8 +217,8 @@ void WifiManagementEventScreen::drawMac(
 
   display->setTextSize(1);
   display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(
@@ -232,6 +227,11 @@ void WifiManagementEventScreen::drawMac(
   );
 
   display->print(label);
+
+  display->setTextColor(
+    UiColor::TEXT,
+    UiColor::BACKGROUND
+  );
 
   display->setCursor(
     VALUE_X,
@@ -245,18 +245,13 @@ void WifiManagementEventScreen::drawMac(
 
 void WifiManagementEventScreen::drawFooter()
 {
-  display->drawFastHLine(
-    8,
-    194,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 194);
 
   drawCentered(
     "HOLD OK : BACK",
     216,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 }
 

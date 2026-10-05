@@ -1,4 +1,5 @@
 #include "ui/screens/WifiNetworkListScreen.hpp"
+#include "ui/UiStyle.hpp"
 
 WifiNetworkListScreen::WifiNetworkListScreen(
   Adafruit_ILI9341* displayInstance,
@@ -178,18 +179,10 @@ const WifiNetwork* WifiNetworkListScreen::getSelectedNetwork() const
 void WifiNetworkListScreen::drawHeader()
 {
   display->fillScreen(
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 
-  display->setTextWrap(false);
-
-  display->setTextSize(2);
-  display->setTextColor(
-    ILI9341_WHITE
-  );
-
-  display->setCursor(10, 10);
-  display->print(title);
+  UiStyle::drawTitle(display, title);
 
   size_t networkCount = scanner->getNetworkCount();
 
@@ -215,6 +208,10 @@ void WifiNetworkListScreen::drawHeader()
   }
 
   display->setTextSize(1);
+  display->setTextColor(
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
+  );
 
   int16_t x1;
   int16_t y1;
@@ -238,12 +235,6 @@ void WifiNetworkListScreen::drawHeader()
 
   display->print(counter);
 
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
 }
 
 void WifiNetworkListScreen::drawNetworks()
@@ -256,7 +247,7 @@ void WifiNetworkListScreen::drawNetworks()
       "NO NETWORKS AVAILABLE",
       105,
       2,
-      ILI9341_WHITE
+      UiColor::TEXT_MUTED
     );
 
     return;
@@ -298,24 +289,24 @@ void WifiNetworkListScreen::drawNetworkItem(
 
   if (selected)
   {
-    display->fillRect(
+    UiStyle::drawSelection(
+      display,
       ITEM_X,
       y - 5,
       ITEM_WIDTH,
-      ITEM_HEIGHT,
-      ILI9341_WHITE
+      ITEM_HEIGHT
     );
 
     display->setTextColor(
-      ILI9341_BLACK,
-      ILI9341_WHITE
+      UiColor::TEXT,
+      UiColor::SELECTION
     );
   }
   else
   {
     display->setTextColor(
-      ILI9341_WHITE,
-      ILI9341_BLACK
+      UiColor::TEXT_MUTED,
+      UiColor::BACKGROUND
     );
   }
 
@@ -348,22 +339,23 @@ void WifiNetworkListScreen::drawNetworkItem(
     )
   );
 
+  display->setTextColor(
+    selected ? UiColor::TEXT_MUTED : UiColor::TEXT_DIM,
+    selected ? UiColor::SELECTION : UiColor::BACKGROUND
+  );
+
   display->setCursor(190, y);
   display->print(info);
 }
 
 void WifiNetworkListScreen::drawFooter()
 {
-  display->drawFastHLine(
-    8,
-    184,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 184);
 
   display->setTextSize(1);
   display->setTextColor(
-    ILI9341_WHITE
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(12, 198);
@@ -379,7 +371,7 @@ void WifiNetworkListScreen::drawFooter()
     "HOLD OK : BACK",
     220,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 }
 
