@@ -6,6 +6,7 @@
 
 #include "ui/Screen.hpp"
 #include "ui/MenuItem.hpp"
+#include "ui/mascot/MascotMenuBadge.hpp"
 
 using NavigationCallback = std::function<void(ScreenId)>;
 
@@ -31,6 +32,9 @@ private:
   int selectedIndex;
   int firstVisibleItem;
   bool needsRedraw;
+
+  MascotMenuBadge mascot;
+  bool mascotFrameDue;
 
   void moveSelection(int direction);
   void openSelectedItem();

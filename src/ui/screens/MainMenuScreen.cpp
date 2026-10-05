@@ -11,6 +11,11 @@ namespace
   };
 
   constexpr int MENU_ITEM_COUNT = sizeof(mainMenuItems) / sizeof(mainMenuItems[0]);
+
+  // The mascot eye sits in the top-right corner of the header, clear of the
+  // title on the left and the cyan rule below.
+  constexpr int16_t MASCOT_X = 244;
+  constexpr int16_t MASCOT_Y = 0;
 }
 
 MainMenuScreen::MainMenuScreen(
@@ -21,40 +26,60 @@ MainMenuScreen::MainMenuScreen(
     navigationCallback(navigationCallback),
     selectedIndex(0),
     firstVisibleItem(0),
-    needsRedraw(true)
+    needsRedraw(true),
+    mascot(displayInstance, MASCOT_X, MASCOT_Y),
+    mascotFrameDue(false)
 {
 }
 
 void MainMenuScreen::onEnter()
 {
   needsRedraw = true;
+  mascot.begin(millis());
 }
 
 void MainMenuScreen::handleInput(InputEvent event)
 {
   if (event == InputEvent::PREVIOUS)
+  {
     moveSelection(-1);
+    mascot.glance(-1, millis());
+  }
   else if (event == InputEvent::NEXT)
+  {
     moveSelection(1);
+    mascot.glance(1, millis());
+  }
   else if (event == InputEvent::SELECT)
+  {
     openSelectedItem();
+  }
 }
 
 void MainMenuScreen::update()
 {
+  mascotFrameDue = mascot.update(millis());
 }
 
 void MainMenuScreen::render()
 {
-  if (!needsRedraw)
+  bool fullRedraw = needsRedraw;
+
+  if (needsRedraw)
   {
-    return;
+    drawHeader();
+    drawMenuItems();
+
+    needsRedraw = false;
   }
 
-  drawHeader();
-  drawMenuItems();
-
-  needsRedraw = false;
+  // The mascot is drawn last, so a full redraw never erases it, and on its
+  // own it only repaints its small corner (no menu flicker).
+  if (fullRedraw || mascotFrameDue)
+  {
+    mascot.present();
+    mascotFrameDue = false;
+  }
 }
 
 void MainMenuScreen::moveSelection(int direction)
@@ -90,9 +115,10 @@ void MainMenuScreen::drawHeader()
 
   UiStyle::drawTitle(display, "APERIO");
 
+  // Version sits next to the title; the top-right corner is the mascot's.
   display->setTextSize(1);
   display->setTextColor(UiColor::TEXT_DIM, UiColor::BACKGROUND);
-  display->setCursor(286, 14);
+  display->setCursor(92, 18);
   display->print("v0.1");
 }
 
