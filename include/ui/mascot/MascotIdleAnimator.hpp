@@ -75,6 +75,7 @@ private:
   static constexpr float IDLE_WAVE_RADIUS_BREATH = 4.0f;
   static constexpr float IDLE_WAVE_SPACING = 6.0f;
   static constexpr float IDLE_WAVE_SPAN = 0.5f;
+  static constexpr float IDLE_WAVE_SPAN_VAR = 0.45f;  // how much arc lengths vary
   static constexpr float WAVE_PHASE_PER_MS = 1.0f / 3000.0f;  // ~3 s breath
   static constexpr float RING_TURNS_PER_MS = 0.00003f;
 

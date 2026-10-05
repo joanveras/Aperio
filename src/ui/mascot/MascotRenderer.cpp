@@ -26,10 +26,13 @@ namespace
 
   // Waves: three arcs per side, each with its own dash pattern so the two
   // sides are never perfect mirrors of each other.
-  constexpr int WAVES_PER_SIDE = 3;
+  constexpr int WAVES_PER_SIDE = 4;
   constexpr float WAVE_DASH_LENGTH = 3.0f;
-  constexpr uint16_t RIGHT_DASHES[WAVES_PER_SIDE] = { 0xF7BD, 0xEDB7, 0xDF7B };
-  constexpr uint16_t LEFT_DASHES[WAVES_PER_SIDE] = { 0xBDEF, 0x7BDE, 0xF6DB };
+  constexpr uint16_t RIGHT_DASHES[WAVES_PER_SIDE] = { 0xF7BD, 0xEDB7, 0xDF7B, 0xBEEF };
+  constexpr uint16_t LEFT_DASHES[WAVES_PER_SIDE] = { 0xBDEF, 0x7BDE, 0xF6DB, 0xDBB7 };
+
+  // Radial fibres across the iris, for texture.
+  constexpr float IRIS_FIBRES = 15.0f;
 
   int16_t roundToInt(float value)
   {
@@ -219,7 +222,14 @@ void MascotRenderer::drawIris(
           continue;
         }
 
-        canvas.setPixel(ring.x + dx, ring.y + dy, MascotColor::SIGNAL_LAST - 1);
+        // The leading edge of each segment glints a little brighter, so the
+        // ring reads as turning machinery rather than a flat circle.
+        bool node = (position - static_cast<float>(segment)) < 0.16f;
+        canvas.setPixel(
+          ring.x + dx,
+          ring.y + dy,
+          node ? MascotColor::SIGNAL_LAST : MascotColor::SIGNAL_LAST - 1
+        );
       }
     }
   }
@@ -240,19 +250,39 @@ void MascotRenderer::drawIris(
           continue;
         }
 
-        uint8_t color = MascotColor::IRIS_LIGHT;
+        // Radial fibres: a slowly rotating streak pattern that nudges the
+        // base shade one step brighter or darker, giving the iris texture.
+        float angle = atan2f(static_cast<float>(dy), static_cast<float>(dx));
+        float fibre = sinf(angle * IRIS_FIBRES + pose.ringRotation * TWO_PI_F + distance * 0.5f);
 
-        if (distance > 8.5f)
+        uint8_t color;
+
+        if (distance > IRIS_RADIUS - 0.8f)
         {
-          color = MascotColor::IRIS_DARK;
+          color = MascotColor::SIGNAL_LAST - 1;              // bright limbal rim
         }
-        else if (distance > INNER_RING_RADIUS + 0.5f)
+        else if (distance > 8.3f)
         {
-          color = MascotColor::IRIS_MID;
+          color = (fibre > 0.30f) ? MascotColor::IRIS_MID : MascotColor::IRIS_DARK;
         }
-        else if (distance > INNER_RING_RADIUS - 0.5f && pose.irisReveal >= 0.9f)
+        else if (distance > INNER_RING_RADIUS + 0.3f)
         {
-          color = MascotColor::SIGNAL_LAST;
+          color = (fibre > 0.25f) ? MascotColor::IRIS_LIGHT : MascotColor::IRIS_MID;
+        }
+        else if (distance > INNER_RING_RADIUS - 0.6f && pose.irisReveal >= 0.9f)
+        {
+          color = MascotColor::SIGNAL_LAST;                  // inner cyan ring
+        }
+        else
+        {
+          color = (fibre < -0.30f) ? MascotColor::IRIS_MID : MascotColor::IRIS_LIGHT;
+        }
+
+        // A cyan glow hugging the pupil.
+        float glowInner = PUPIL_RADIUS * pose.pupilScale + 0.2f;
+        if (pose.irisReveal >= 0.9f && distance > glowInner && distance < glowInner + 1.3f)
+        {
+          color = (fibre > 0.0f) ? MascotColor::SIGNAL_LAST : MascotColor::SIGNAL_LAST - 1;
         }
 
         canvas.setPixel(iris.x + dx, iris.y + dy, color);
@@ -283,12 +313,19 @@ void MascotRenderer::drawIris(
   // The 2x2 white spot is what makes the eye look cute.
   if (pose.irisReveal >= 1.0f && pose.pupilReveal >= 0.6f)
   {
+    // Primary catch-light (the 2x2 white spot that makes the eye look alive).
     canvas.setPixel(iris.x - 3, iris.y - 3, MascotColor::WHITE);
     canvas.setPixel(iris.x - 2, iris.y - 3, MascotColor::WHITE);
     canvas.setPixel(iris.x - 3, iris.y - 2, MascotColor::WHITE);
     canvas.setPixel(iris.x - 2, iris.y - 2, MascotColor::WHITE);
+    // Its soft cyan fringe.
+    canvas.setPixel(iris.x - 1, iris.y - 3, MascotColor::SIGNAL_LAST);
+    canvas.setPixel(iris.x - 4, iris.y - 1, MascotColor::SIGNAL_LAST);
 
-    canvas.setPixel(iris.x + 2, iris.y + 2, MascotColor::SIGNAL_LAST);
+    // A smaller secondary reflection on the lower right, for depth.
+    canvas.setPixel(iris.x + 3, iris.y + 2, MascotColor::SIGNAL_LAST);
+    canvas.setPixel(iris.x + 4, iris.y + 3, MascotColor::SIGNAL_LAST - 2);
+    canvas.setPixel(iris.x + 3, iris.y + 3, MascotColor::SIGNAL_LAST - 2);
   }
 }
 
@@ -415,12 +452,12 @@ void MascotRenderer::drawWaves(
           break;
 
         case WaveMode::OUTWARD:
-          position = fraction(wave / 3.0f + pose.wavePhase) * WAVES_PER_SIDE;
+          position = fraction(wave / static_cast<float>(WAVES_PER_SIDE) + pose.wavePhase) * WAVES_PER_SIDE;
           strength = 1.0f - position / WAVES_PER_SIDE;
           break;
 
         case WaveMode::INWARD:
-          position = fraction(wave / 3.0f - pose.wavePhase) * WAVES_PER_SIDE;
+          position = fraction(wave / static_cast<float>(WAVES_PER_SIDE) - pose.wavePhase) * WAVES_PER_SIDE;
           strength = 1.0f - position / WAVES_PER_SIDE;
           break;
       }
@@ -479,22 +516,47 @@ void MascotRenderer::drawArc(
   {
     int dash = static_cast<int>((angle + span) * radius / WAVE_DASH_LENGTH) & 0x0F;
 
-    if (((dashPattern >> dash) & 1) == 0)
+    // A bright node sits at the arc's apex (its point nearest the eye), even
+    // across a dash gap: it reads as the source the signal radiates from.
+    bool apex = fabsf(angle) < 0.055f;
+
+    if (((dashPattern >> dash) & 1) == 0 && !apex)
     {
       continue;
     }
 
-    uint8_t color = fabsf(angle) > span * 0.7f ? endColor : bodyColor;
+    uint8_t color;
+
+    if (apex)
+    {
+      float nodeIntensity = intensity * 1.7f;
+      if (nodeIntensity > 1.0f)
+      {
+        nodeIntensity = 1.0f;
+      }
+      color = MascotColor::signal(nodeIntensity);
+    }
+    else
+    {
+      color = fabsf(angle) > span * 0.7f ? endColor : bodyColor;
+    }
 
     if (color == MascotColor::BLACK)
     {
       continue;
     }
 
-    canvas.setPixel(
-      roundToInt(eye.x + side * radius * cosf(angle)),
-      roundToInt(eye.y + radius * sinf(angle)),
-      color
-    );
+    int16_t py = roundToInt(eye.y + radius * sinf(angle));
+    canvas.setPixel(roundToInt(eye.x + side * radius * cosf(angle)), py, color);
+
+    if (apex)
+    {
+      // Thicken the node one pixel outward, as a soft glow.
+      canvas.setPixel(
+        roundToInt(eye.x + side * (radius + 1.0f) * cosf(angle)),
+        py,
+        endColor
+      );
+    }
   }
 }

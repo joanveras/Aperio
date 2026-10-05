@@ -236,6 +236,7 @@ void MascotIdleAnimator::buildBreathingPose(uint32_t now)
   pose.waveRadius = IDLE_WAVE_RADIUS + IDLE_WAVE_RADIUS_BREATH * breath;
   pose.waveSpacing = IDLE_WAVE_SPACING;
   pose.waveSpan = IDLE_WAVE_SPAN;
+  pose.waveSpanVar = IDLE_WAVE_SPAN_VAR;   // arcs vary in length, not uniform
   pose.waveAmpLeft = 1.0f;
   pose.waveAmpRight = 1.0f;
   pose.wavePhase = phaseT;
@@ -267,6 +268,7 @@ void MascotIdleAnimator::buildEntryPose(uint32_t now)
   pose.waveRadius = lerp(12.0f, IDLE_WAVE_RADIUS, waves);
   pose.waveSpacing = IDLE_WAVE_SPACING;
   pose.waveSpan = IDLE_WAVE_SPAN;
+  pose.waveSpanVar = IDLE_WAVE_SPAN_VAR;
   pose.wavePhase = now * WAVE_PHASE_PER_MS;
 }
 
@@ -298,13 +300,33 @@ void MascotIdleAnimator::buildWakePose(uint32_t now)
     0.0f, 1.0f
   );
 
-  pose.eyeOpen = lerp(wakeFromOpen, 1.0f, smoothstep(0.0f, 0.5f, wt));
+  // The eye snaps open with a slight overshoot before settling.
+  float open = smoothstep(0.0f, 0.42f, wt);
+  float overshoot = std::sin(PI_F * clampf(wt / 0.7f, 0.0f, 1.0f)) * 0.12f * (1.0f - wt);
+  pose.eyeOpen = clampf(lerp(wakeFromOpen, 1.0f, open) + overshoot, 0.0f, 1.12f);
 
-  const float e = std::sin(PI_F * clampf((wt - 0.15f) / 0.85f, 0.0f, 1.0f));
-  pose.flash = 0.8f * e;
-  pose.waveIntensity = lerp(IDLE_WAVE_INTENSITY, 1.0f, e);
-  pose.waveRadius = IDLE_WAVE_RADIUS + 22.0f * e;
-  pose.waveSpacing = IDLE_WAVE_SPACING + 3.0f * e;
+  // The pupil reacts to the light: a quick contraction, then dilates back
+  // with a small overshoot -- the eye "waking" rather than just fading in.
+  float contract = 1.0f - smoothstep(0.0f, 0.25f, wt);
+  float dilate = std::sin(PI_F * clampf((wt - 0.20f) / 0.80f, 0.0f, 1.0f));
+  pose.pupilScale = 1.0f - 0.22f * contract + 0.14f * dilate;
+
+  // A brief cyan spark as the signal lands -- short, not a long white wash.
+  pose.flash = 0.30f * (1.0f - smoothstep(0.0f, 0.22f, wt));
+
+  // The waves burst outward as one expanding pulse, then relax to breathing.
+  float pulse = std::sin(PI_F * clampf((wt - 0.05f) / 0.90f, 0.0f, 1.0f));
+  pose.waveMode = WaveMode::OUTWARD;
+  pose.wavePhase = clampf((wt - 0.05f) / 0.90f, 0.0f, 1.0f);
+  pose.waveIntensity = lerp(IDLE_WAVE_INTENSITY, 1.0f, pulse);
+  pose.waveRadius = IDLE_WAVE_RADIUS + 20.0f * pulse;
+  pose.waveSpacing = IDLE_WAVE_SPACING + 2.5f * pulse;
+  pose.waveSpan = IDLE_WAVE_SPAN + 0.15f * pulse;
+  pose.waveAmpLeft = 1.0f + 0.25f * pulse;
+  pose.waveAmpRight = 1.0f + 0.25f * pulse;
+
+  // A tiny gaze dart as it comes to.
+  pose.gazeX = 0.22f * std::sin(PI_F * clampf(wt / 0.5f, 0.0f, 1.0f));
 }
 
 // Layers the active gesture on top of the breathing pose.
