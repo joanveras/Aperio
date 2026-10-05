@@ -10,6 +10,6 @@ constexpr uint8_t BTN_LEFT   = 25;
 constexpr uint8_t BTN_SELECT = 26;
 constexpr uint8_t BTN_RIGHT  = 32;
 
-constexpr uint32_t TFT_SPI_FREQUENCY = 20000000;
+constexpr uint32_t TFT_SPI_FREQUENCY = 27000000;
 
 constexpr const char* APERIO_VERSION = "v0.1";
