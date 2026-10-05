@@ -20,6 +20,9 @@ public:
   void update() override;
   void render() override;
 
+  // Never sleep while the monitor is capturing live traffic.
+  bool allowsIdle() const override { return false; }
+
 private:
   static constexpr uint32_t REFRESH_INTERVAL = 500;
 
