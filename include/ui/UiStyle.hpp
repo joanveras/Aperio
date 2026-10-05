@@ -34,7 +34,15 @@ namespace UiStyle
 {
   // Screen title at the top left (text size 2), underlined by a short cyan
   // dash that fades into a thin divider across the screen.
-  void drawTitle(Adafruit_ILI9341* display, const char* title);
+  //
+  // `ruleEndX` is where the thin divider line stops on the right. Leave it
+  // at -1 for the full width; the menu screens pass a smaller value so the
+  // line does not run under the mascot in the corner.
+  void drawTitle(
+    Adafruit_ILI9341* display,
+    const char* title,
+    int16_t ruleEndX = -1
+  );
 
   // Thin horizontal divider across the screen.
   void drawDivider(Adafruit_ILI9341* display, int16_t y);

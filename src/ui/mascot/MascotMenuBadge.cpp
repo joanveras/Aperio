@@ -104,17 +104,24 @@ bool MascotMenuBadge::update(uint32_t now)
     eyeOpen = std::fabs(std::cos(PI_F * t));  // 1 -> 0 -> 1
   }
 
-  // Rebuild the pose: a fully-formed eye, no waves, no marks.
+  // Rebuild the pose: a fully-formed eye with breathing signal waves, no
+  // marks (the "+" and tick would not fit the header).
   pose = MascotPose();
-  pose.waveIntensity = 0.0f;
-  pose.waveAmpLeft = 0.0f;
-  pose.waveAmpRight = 0.0f;
   pose.marksReveal = 0.0f;
 
   pose.eyeOpen = eyeOpen;
   pose.gazeX = clampf(gaze, -1.0f, 1.0f);
   pose.gazeY = 0.0f;
   pose.ringRotation = now * RING_TURNS_PER_MS;
+
+  pose.waveMode = WaveMode::BREATHE;
+  pose.waveIntensity = WAVE_INTENSITY;
+  pose.waveRadius = WAVE_RADIUS;
+  pose.waveSpacing = WAVE_SPACING;
+  pose.waveSpan = WAVE_SPAN;
+  pose.waveAmpLeft = 1.0f;
+  pose.waveAmpRight = 1.0f;
+  pose.wavePhase = now * WAVE_PHASE_PER_MS;
 
   return (now - lastFrame) >= FRAME_INTERVAL_MS;
 }

@@ -12,10 +12,11 @@ namespace
 
   constexpr int MENU_ITEM_COUNT = sizeof(mainMenuItems) / sizeof(mainMenuItems[0]);
 
-  // The mascot eye sits in the top-right corner of the header, clear of the
-  // title on the left and the cyan rule below.
-  constexpr int16_t MASCOT_X = 244;
+  // The mascot (eye + waves) sits in the top-right corner of the header.
+  // The title rule stops at RULE_END_X so it does not run under the mascot.
+  constexpr int16_t MASCOT_X = 206;
   constexpr int16_t MASCOT_Y = 0;
+  constexpr int16_t RULE_END_X = 200;
 }
 
 MainMenuScreen::MainMenuScreen(
@@ -113,7 +114,7 @@ void MainMenuScreen::drawHeader()
 {
   display->fillScreen(UiColor::BACKGROUND);
 
-  UiStyle::drawTitle(display, "APERIO");
+  UiStyle::drawTitle(display, "APERIO", RULE_END_X);
 
   // Version sits next to the title; the top-right corner is the mascot's.
   display->setTextSize(1);

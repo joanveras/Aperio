@@ -14,8 +14,9 @@ namespace
   constexpr int MENU_ITEM_COUNT = sizeof(mainMenuItems) / sizeof(mainMenuItems[0]);
 
   // Same top-right corner as the main menu, for a consistent companion.
-  constexpr int16_t MASCOT_X = 244;
+  constexpr int16_t MASCOT_X = 206;
   constexpr int16_t MASCOT_Y = 0;
+  constexpr int16_t RULE_END_X = 200;
 }
 
 WifiMenuScreen::WifiMenuScreen(
@@ -139,7 +140,7 @@ void WifiMenuScreen::drawHeader()
 {
   display->fillScreen(UiColor::BACKGROUND);
 
-  UiStyle::drawTitle(display, "WI-FI");
+  UiStyle::drawTitle(display, "WI-FI", RULE_END_X);
 }
 
 void WifiMenuScreen::drawMenuItems()

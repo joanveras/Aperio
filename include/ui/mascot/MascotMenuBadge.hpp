@@ -7,8 +7,8 @@
 #include "MascotView.hpp"
 #include "MascotPose.hpp"
 
-// A small, self-contained mascot for the menu headers: just the eye
-// (no waves, no marks), drawn at 1x in the top-right corner.
+// A small, self-contained mascot for the menu headers: the eye with its
+// signal waves around it (no marks), drawn at 1x in the top-right corner.
 //
 // It lives on its own: it blinks by itself every few seconds and flicks its
 // gaze to the side when the user navigates, so the menus feel alive without
@@ -22,10 +22,11 @@
 class MascotMenuBadge
 {
 public:
-  // The eye is ~68x34 logical pixels. Drawn at 1x, so canvas px == display
-  // px. The canvas is kept just short enough to sit above the title rule.
-  static constexpr int16_t CANVAS_WIDTH = 72;
-  static constexpr int16_t CANVAS_HEIGHT = 33;
+  // The eye is ~68x34 logical pixels; the canvas is wider and taller so the
+  // signal waves have room on both sides. Drawn at 1x, so canvas px ==
+  // display px. Kept short enough to clear the first menu row below.
+  static constexpr int16_t CANVAS_WIDTH = 112;
+  static constexpr int16_t CANVAS_HEIGHT = 47;
   static constexpr uint8_t PIXEL_SCALE = 1;
 
   MascotMenuBadge(
@@ -65,6 +66,14 @@ private:
 
   // Idle: a very slow iris-ring rotation, for a quiet "scanning" feel.
   static constexpr float RING_TURNS_PER_MS = 0.00003f;
+
+  // Signal waves: compact arcs that breathe around the eye. The radius and
+  // span are tuned so three arcs per side fit inside the canvas.
+  static constexpr float WAVE_INTENSITY = 0.6f;
+  static constexpr float WAVE_RADIUS = 38.0f;
+  static constexpr float WAVE_SPACING = 5.0f;
+  static constexpr float WAVE_SPAN = 0.42f;
+  static constexpr float WAVE_PHASE_PER_MS = 0.0004f;  // ~2.5 s per breath
 
   Adafruit_ILI9341* display;
   int16_t posX;
