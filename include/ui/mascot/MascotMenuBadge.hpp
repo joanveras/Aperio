@@ -68,11 +68,12 @@ private:
   static constexpr float RING_TURNS_PER_MS = 0.00003f;
 
   // Signal waves: compact arcs that breathe around the eye. The radius and
-  // span are tuned so three arcs per side fit inside the canvas.
-  static constexpr float WAVE_INTENSITY = 0.6f;
+  // span are tuned so three arcs per side fit inside the canvas. A strong
+  // intensity keeps the arcs bright and present.
+  static constexpr float WAVE_INTENSITY = 0.9f;
   static constexpr float WAVE_RADIUS = 38.0f;
   static constexpr float WAVE_SPACING = 5.0f;
-  static constexpr float WAVE_SPAN = 0.42f;
+  static constexpr float WAVE_SPAN = 0.48f;
   static constexpr float WAVE_PHASE_PER_MS = 0.0004f;  // ~2.5 s per breath
 
   Adafruit_ILI9341* display;
