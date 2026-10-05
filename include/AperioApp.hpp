@@ -17,6 +17,7 @@
 #include "ui/screens/WifiManagementEventScreen.hpp"
 #include "ui/screens/WifiManagementEventsScreen.hpp"
 #include "ui/screens/TxLabScreen.hpp"
+#include "ui/mascot/BootAnimation.hpp"
 #include "wifi/WifiTransmitter.hpp"
 #include "wifi/WifiScanner.hpp"
 #include "wifi/WifiMonitor.hpp"
@@ -36,6 +37,8 @@ public:
 
 private:
     Adafruit_ILI9341* display;
+
+    BootAnimation bootAnimation;
 
     InputManager input;
     ScreenManager screenManager;
@@ -60,7 +63,7 @@ private:
     WifiTransmitter wifiTransmitter;
     TxLabScreen txLabScreen;
 
-    void showBootScreen();
+    void updateBoot(InputEvent event);
 
     void handleNavigation(ScreenId screenId);
 

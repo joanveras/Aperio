@@ -9,6 +9,7 @@ AperioApp::AperioApp(
   uint8_t nextButtonPin
 )
   : display(displayInstance),
+    bootAnimation(displayInstance),
     input(
       previousButtonPin,
       selectButtonPin,
@@ -92,11 +93,14 @@ void AperioApp::begin()
   display->begin(TFT_SPI_FREQUENCY);
   display->setRotation(1);
 
-  showBootScreen();
-
-  screenManager.begin(&mainMenu);
-
   wifiScanner.begin();
+
+  bootAnimation.begin(millis());
+
+  if (bootAnimation.isFinished())
+  {
+    screenManager.begin(&mainMenu);
+  }
 }
 
 void AperioApp::update()
@@ -104,6 +108,12 @@ void AperioApp::update()
   input.update();
 
   InputEvent event = input.getEvent();
+
+  if (!bootAnimation.isFinished())
+  {
+    updateBoot(event);
+    return;
+  }
 
   if (event != InputEvent::NONE)
   {
@@ -114,57 +124,21 @@ void AperioApp::update()
   screenManager.render();
 }
 
-void AperioApp::showBootScreen()
+// The main menu only starts once the boot animation is over. Any button
+// skips the animation.
+void AperioApp::updateBoot(InputEvent event)
 {
-  display->fillScreen(ILI9341_BLACK);
-  display->setTextWrap(false);
-
-  auto drawCentered = [this](
-    const char* text,
-    int16_t y,
-    uint8_t textSize,
-    uint16_t color
-  )
+  if (event != InputEvent::NONE)
   {
-    int16_t x1;
-    int16_t y1;
-    uint16_t width;
-    uint16_t height;
+    bootAnimation.skip();
+  }
 
-    display->setTextSize(textSize);
-    display->setTextColor(color);
+  bootAnimation.update(millis());
 
-    display->getTextBounds(
-      text,
-      0,
-      0,
-      &x1,
-      &y1,
-      &width,
-      &height
-    );
-
-    int16_t x = (display->width() - width) / 2;
-
-    display->setCursor(x, y);
-    display->print(text);
-  };
-
-  drawCentered(
-    "Aperio",
-    90,
-    4,
-    ILI9341_WHITE
-  );
-
-  drawCentered(
-    "Quod Latet",
-    140,
-    2,
-    ILI9341_WHITE
-  );
-
-  delay(5000);
+  if (bootAnimation.isFinished())
+  {
+    screenManager.begin(&mainMenu);
+  }
 }
 
 void AperioApp::handleNavigation(ScreenId screenId)
