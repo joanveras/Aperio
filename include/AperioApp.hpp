@@ -61,5 +61,8 @@ private:
     TxLabScreen txLabScreen;
 
     void showBootScreen();
+
     void handleNavigation(ScreenId screenId);
+
+    WifiPmfMode detectNetworkPmf(const WifiNetwork& network);
 };
