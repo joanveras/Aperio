@@ -164,28 +164,14 @@ void WifiMonitorMenuScreen::drawMenuItem(
       ITEM_WIDTH,
       ITEM_HEIGHT
     );
-
-    display->setTextColor(
-      UiColor::TEXT,
-      UiColor::SELECTION
-    );
-  }
-  else
-  {
-    display->setTextColor(
-      UiColor::TEXT_MUTED,
-      UiColor::BACKGROUND
-    );
   }
 
-  display->setTextSize(2);
-
-  display->setCursor(
+  UiStyle::text(
+    display,
+    UiFont::ITEM,
     20,
-    y
-  );
-
-  display->print(
+    y,
+    selected ? UiColor::TEXT : UiColor::TEXT_MUTED,
     monitorMenuItems[index].label
   );
 }

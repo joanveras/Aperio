@@ -32,18 +32,20 @@ void AboutScreen::render()
 
   UiStyle::drawTitle(display, "ABOUT");
 
-  drawCentered(
-    "APERIO",
-    58,
-    2,
-    UiColor::TEXT
+  UiStyle::textCentered(
+    display,
+    UiFont::TITLE,
+    56,
+    UiColor::TEXT,
+    "APERIO"
   );
 
-  drawCentered(
-    "Quod Latet",
-    82,
-    1,
-    UiColor::ACCENT
+  UiStyle::textCentered(
+    display,
+    UiFont::BODY,
+    86,
+    UiColor::ACCENT,
+    "Quod Latet"
   );
 
   display->setTextSize(1);

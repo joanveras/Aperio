@@ -43,11 +43,12 @@ void PlaceholderScreen::render()
   UiStyle::drawTitle(display, title);
 
   // Content
-  drawCentered(
-    "UNDER DEVELOPMENT",
-    92,
-    2,
-    UiColor::ACCENT
+  UiStyle::textCentered(
+    display,
+    UiFont::ITEM,
+    90,
+    UiColor::ACCENT,
+    "UNDER DEVELOPMENT"
   );
 
   drawCentered(

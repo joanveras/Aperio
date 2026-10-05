@@ -1,9 +1,21 @@
 #include "ui/UiStyle.hpp"
 
+#include <Fonts/FreeSans9pt7b.h>
+#include <Fonts/FreeSansBold9pt7b.h>
+#include <Fonts/FreeSansBold12pt7b.h>
+
+// Defined here only, so the font data lives in one place in flash.
+namespace UiFont
+{
+  const GFXfont* TITLE = &FreeSansBold12pt7b;
+  const GFXfont* ITEM = &FreeSansBold9pt7b;
+  const GFXfont* BODY = &FreeSans9pt7b;
+}
+
 namespace
 {
   constexpr int16_t TITLE_X = 10;
-  constexpr int16_t TITLE_Y = 10;
+  constexpr int16_t TITLE_Y = 9;
 
   constexpr int16_t RULE_Y = 33;
   constexpr int16_t RULE_ACCENT_WIDTH = 18;
@@ -14,13 +26,63 @@ namespace
   constexpr int16_t SELECTION_BAR_WIDTH = 3;
 }
 
+void UiStyle::text(
+  Adafruit_ILI9341* display,
+  const GFXfont* font,
+  int16_t x,
+  int16_t topY,
+  uint16_t color,
+  const char* text
+)
+{
+  display->setFont(font);
+  display->setTextColor(color);
+  display->setTextWrap(false);
+
+  // A custom font places the cursor at the baseline, not the top-left.
+  // getTextBounds reports how far above the cursor the glyphs reach (y1 is
+  // negative), so topY - y1 puts the top of the text exactly at topY.
+  int16_t x1;
+  int16_t y1;
+  uint16_t width;
+  uint16_t height;
+
+  display->getTextBounds(text, 0, 0, &x1, &y1, &width, &height);
+
+  display->setCursor(x - x1, topY - y1);
+  display->print(text);
+
+  display->setFont(nullptr);
+}
+
+void UiStyle::textCentered(
+  Adafruit_ILI9341* display,
+  const GFXfont* font,
+  int16_t topY,
+  uint16_t color,
+  const char* text
+)
+{
+  display->setFont(font);
+  display->setTextColor(color);
+  display->setTextWrap(false);
+
+  int16_t x1;
+  int16_t y1;
+  uint16_t width;
+  uint16_t height;
+
+  display->getTextBounds(text, 0, 0, &x1, &y1, &width, &height);
+
+  display->setCursor((display->width() - width) / 2 - x1, topY - y1);
+  display->print(text);
+
+  display->setFont(nullptr);
+}
+
 void UiStyle::drawTitle(Adafruit_ILI9341* display, const char* title)
 {
-  display->setTextWrap(false);
-  display->setTextSize(2);
-  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
-  display->setCursor(TITLE_X, TITLE_Y);
-  display->print(title);
+  text(display, UiFont::TITLE, TITLE_X, TITLE_Y, UiColor::TEXT, title);
 
   display->fillRect(
     TITLE_X,
