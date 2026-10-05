@@ -7,6 +7,7 @@
 #include <freertos/portmacro.h>
 
 #include "WifiMonitorStats.hpp"
+#include "WifiNetwork.hpp"
 
 class WifiMonitor
 {
@@ -54,6 +55,18 @@ public:
     uint8_t channel
   );
 
+  bool getKnownApPmf(
+    const uint8_t* bssid,
+    WifiPmfMode& pmf
+  ) const;
+
+  bool getKnownApPmf(
+    const String& bssid,
+    WifiPmfMode& pmf
+  ) const;
+
+  bool forgetKnownApPmf(const String& bssid);
+
 private:
   enum class ManagementSubtype : uint8_t
   {
@@ -96,7 +109,11 @@ private:
   struct KnownApChannel
   {
     uint8_t bssid[6] = {};
+
     uint8_t channel = 0;
+
+    WifiPmfMode pmf = WifiPmfMode::PMF_UNKNOWN;
+
     bool valid = false;
   };
 
@@ -114,6 +131,11 @@ private:
     const uint8_t* first,
     const uint8_t* second
   ) const;
+
+  bool rememberApPmf(
+    const uint8_t* bssid,
+    WifiPmfMode pmf
+  );
 
   static constexpr size_t KNOWN_AP_CACHE_SIZE = 40;
 
