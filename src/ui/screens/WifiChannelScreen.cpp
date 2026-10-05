@@ -1,4 +1,5 @@
 #include "ui/screens/WifiChannelScreen.hpp"
+#include "ui/UiStyle.hpp"
 
 WifiChannelScreen::WifiChannelScreen(
   Adafruit_ILI9341* displayInstance,
@@ -177,20 +178,16 @@ void WifiChannelScreen::openSelectedChannel()
 void WifiChannelScreen::drawHeader()
 {
   display->fillScreen(
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 
-  display->setTextWrap(false);
-
-  display->setTextSize(2);
-  display->setTextColor(
-    ILI9341_WHITE
-  );
-
-  display->setCursor(10, 10);
-  display->print("CHANNELS");
+  UiStyle::drawTitle(display, "CHANNELS");
 
   display->setTextSize(1);
+  display->setTextColor(
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
+  );
 
   display->setCursor(
     display->width() - 42,
@@ -199,12 +196,6 @@ void WifiChannelScreen::drawHeader()
 
   display->print("2.4G");
 
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
 }
 
 void WifiChannelScreen::drawChannels()
@@ -256,24 +247,24 @@ void WifiChannelScreen::drawChannelItem(
 
   if (selected)
   {
-    display->fillRect(
+    UiStyle::drawSelection(
+      display,
       ITEM_X,
       y - 5,
       ITEM_WIDTH,
-      ITEM_HEIGHT,
-      ILI9341_WHITE
+      ITEM_HEIGHT
     );
 
     display->setTextColor(
-      ILI9341_BLACK,
-      ILI9341_WHITE
+      UiColor::TEXT,
+      UiColor::SELECTION
     );
   }
   else
   {
     display->setTextColor(
-      ILI9341_WHITE,
-      ILI9341_BLACK
+      UiColor::TEXT_MUTED,
+      UiColor::BACKGROUND
     );
   }
 
@@ -310,6 +301,14 @@ void WifiChannelScreen::drawChannelItem(
     )
   );
 
+  if (!selected)
+  {
+    display->setTextColor(
+      stats.networkCount == 0 ? UiColor::TEXT_DIM : UiColor::TEXT_MUTED,
+      UiColor::BACKGROUND
+    );
+  }
+
   display->setCursor(
     110,
     y
@@ -342,16 +341,12 @@ void WifiChannelScreen::drawChannelItem(
 
 void WifiChannelScreen::drawFooter()
 {
-  display->drawFastHLine(
-    8,
-    184,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 184);
 
   display->setTextSize(1);
   display->setTextColor(
-    ILI9341_WHITE
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(
@@ -385,7 +380,7 @@ void WifiChannelScreen::drawFooter()
     "HOLD OK : BACK",
     220,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 }
 

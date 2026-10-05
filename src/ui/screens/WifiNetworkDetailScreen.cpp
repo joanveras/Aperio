@@ -1,5 +1,6 @@
 #include "ui/screens/WifiNetworkDetailScreen.hpp"
 #include "wifi/WifiUtils.hpp"
+#include "ui/UiStyle.hpp"
 
 WifiNetworkDetailScreen::WifiNetworkDetailScreen(
   Adafruit_ILI9341* displayInstance
@@ -43,7 +44,7 @@ void WifiNetworkDetailScreen::render()
     return;
   }
 
-  display->fillScreen(ILI9341_BLACK);
+  display->fillScreen(UiColor::BACKGROUND);
   display->setTextWrap(false);
 
   drawHeader();
@@ -54,7 +55,7 @@ void WifiNetworkDetailScreen::render()
       "NO NETWORK SELECTED",
       105,
       2,
-      ILI9341_WHITE
+      UiColor::TEXT_MUTED
     );
   }
   else
@@ -69,18 +70,7 @@ void WifiNetworkDetailScreen::render()
 
 void WifiNetworkDetailScreen::drawHeader()
 {
-  display->setTextSize(2);
-  display->setTextColor(ILI9341_WHITE);
-
-  display->setCursor(10, 10);
-  display->print("NETWORK DETAILS");
-
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawTitle(display, "NETWORK DETAILS");
 }
 
 void WifiNetworkDetailScreen::drawDetails()
@@ -91,15 +81,13 @@ void WifiNetworkDetailScreen::drawDetails()
   }
 
   display->setTextSize(1);
-  display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
-  );
 
   // SSID
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(20, 46);
   display->print("SSID");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(20, 60);
 
   if (network.ssid.isEmpty())
@@ -121,31 +109,39 @@ void WifiNetworkDetailScreen::drawDetails()
   }
 
   // BSSID
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(20, 82);
   display->print("BSSID");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(20, 96);
   display->print(network.bssid);
 
   // RSSI
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(20, 120);
   display->print("RSSI");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(110, 120);
   display->print(network.rssi);
   display->print(" dBm");
 
   // Channel
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(20, 138);
   display->print("Channel");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(110, 138);
   display->print(network.channel);
 
   // Security
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(20, 156);
   display->print("Security");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(110, 156);
   display->print(
     wifiAuthModeToString(
@@ -154,9 +150,11 @@ void WifiNetworkDetailScreen::drawDetails()
   );
 
   // PMF
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(20, 174);
   display->print("PMF");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(110, 174);
   display->print(
     wifiPmfModeToString(
@@ -167,18 +165,13 @@ void WifiNetworkDetailScreen::drawDetails()
 
 void WifiNetworkDetailScreen::drawFooter()
 {
-  display->drawFastHLine(
-    8,
-    194,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 194);
 
   drawCentered(
     "HOLD OK : BACK",
     216,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 }
 

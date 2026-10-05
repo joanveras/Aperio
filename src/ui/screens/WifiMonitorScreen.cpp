@@ -1,5 +1,6 @@
 #include "ui/screens/WifiMonitorScreen.hpp"
 #include "wifi/WifiManagementUtils.hpp"
+#include "ui/UiStyle.hpp"
 
 WifiMonitorScreen::WifiMonitorScreen(
   Adafruit_ILI9341* displayInstance,
@@ -184,7 +185,7 @@ void WifiMonitorScreen::handleSelect()
 
 void WifiMonitorScreen::drawScreen()
 {
-  display->fillScreen(ILI9341_BLACK);
+  display->fillScreen(UiColor::BACKGROUND);
 
   display->setTextWrap(false);
 
@@ -204,22 +205,18 @@ void WifiMonitorScreen::drawScreen()
 
 void WifiMonitorScreen::drawHeader()
 {
-  display->setTextSize(2);
-  display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
-  );
-
-  display->setCursor(10, 10);
-  display->print("802.11 MONITOR");
+  UiStyle::drawTitle(display, "802.11 MONITOR");
 
   display->setTextSize(1);
 
   if (monitor != nullptr && monitor->isPaused())
   {
+    display->setTextColor(UiColor::WARNING, UiColor::BACKGROUND);
     display->setCursor(205, 14);
     display->print("PAUSED");
   }
+
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
 
   char channelText[12];
 
@@ -235,29 +232,20 @@ void WifiMonitorScreen::drawHeader()
   display->setCursor(278, 14);
   display->print(channelText);
 
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
 }
 
 void WifiMonitorScreen::drawStats()
 {
-  display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
-  );
-
   display->setTextSize(1);
 
   // Frames/s
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(16, 50);
   display->print("Frames/s");
 
   display->setTextSize(2);
 
+  display->setTextColor(UiColor::ACCENT, UiColor::BACKGROUND);
   display->setCursor(16, 64);
   display->print(stats.framesPerSecond);
 
@@ -267,70 +255,83 @@ void WifiMonitorScreen::drawStats()
   display->setTextSize(1);
 
   // Left column
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(16, 100);
   display->print("Total");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(105, 100);
   display->print(stats.totalFrames);
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(16, 116);
   display->print("Management");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(105, 116);
   display->print(stats.managementFrames);
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(16, 132);
   display->print("Control");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(105, 132);
   display->print(stats.controlFrames);
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(16, 148);
   display->print("Data");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(105, 148);
   display->print(stats.dataFrames);
 
   // Right column
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(178, 100);
   display->print("Beacon");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(265, 100);
   display->print(stats.beaconFrames);
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(178, 116);
   display->print("Probe Req");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(265, 116);
   display->print(stats.probeRequestFrames);
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(178, 132);
   display->print("Probe Resp");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(265, 132);
   display->print(stats.probeResponseFrames);
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(178, 148);
   display->print("Deauth");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(265, 148);
   display->print(stats.deauthFrames);
 
+  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
   display->setCursor(178, 164);
   display->print("Disassoc");
 
+  display->setTextColor(UiColor::TEXT, UiColor::BACKGROUND);
   display->setCursor(265, 164);
   display->print(stats.disassociationFrames);
 }
 
 void WifiMonitorScreen::drawFooter()
 {
-  display->drawFastHLine(
-    8,
-    184,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 184);
 
   if (monitorStartFailed)
   {
@@ -338,7 +339,7 @@ void WifiMonitorScreen::drawFooter()
       "HOLD OK : BACK",
       220,
       1,
-      ILI9341_WHITE
+      UiColor::TEXT_DIM
     );
 
     return;
@@ -346,8 +347,8 @@ void WifiMonitorScreen::drawFooter()
 
   display->setTextSize(1);
   display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(12, 198);
@@ -386,7 +387,7 @@ void WifiMonitorScreen::drawFooter()
     "HOLD OK : BACK",
     220,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_DIM
   );
 }
 
@@ -397,7 +398,7 @@ void WifiMonitorScreen::clearHeaderArea()
     0,
     display->width(),
     40,
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 }
 
@@ -408,7 +409,7 @@ void WifiMonitorScreen::clearStatsArea()
     40,
     display->width(),
     142,
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 }
 
@@ -419,7 +420,7 @@ void WifiMonitorScreen::clearFooterArea()
     185,
     display->width(),
     55,
-    ILI9341_BLACK
+    UiColor::BACKGROUND
   );
 }
 
@@ -429,14 +430,14 @@ void WifiMonitorScreen::drawError()
     "MONITOR ERROR",
     92,
     2,
-    ILI9341_WHITE
+    UiColor::DANGER
   );
 
   drawCentered(
     "FAILED TO START",
     124,
     1,
-    ILI9341_WHITE
+    UiColor::TEXT_MUTED
   );
 }
 
@@ -452,12 +453,17 @@ void WifiMonitorScreen::drawLastManagementEvent()
 {
   display->setTextSize(1);
   display->setTextColor(
-    ILI9341_WHITE,
-    ILI9341_BLACK
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(178, 50);
   display->print("LAST EVENT");
+
+  display->setTextColor(
+    UiColor::TEXT,
+    UiColor::BACKGROUND
+  );
 
   const WifiManagementEvent& event = stats.lastManagementEvent;
 

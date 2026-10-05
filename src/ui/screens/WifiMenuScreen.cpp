@@ -1,4 +1,5 @@
 #include "../../../include/ui/screens/WifiMenuScreen.hpp"
+#include "ui/UiStyle.hpp"
 
 namespace
 {
@@ -112,20 +113,9 @@ void WifiMenuScreen::openSelectedItem()
 
 void WifiMenuScreen::drawHeader()
 {
-  display->fillScreen(ILI9341_BLACK);
-  display->setTextWrap(false);
+  display->fillScreen(UiColor::BACKGROUND);
 
-  display->setTextSize(2);
-  display->setTextColor(ILI9341_WHITE);
-  display->setCursor(10, 10);
-  display->print("WI-FI");
-
-  display->drawFastHLine(
-    8,
-    36,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawTitle(display, "WI-FI");
 }
 
 void WifiMenuScreen::drawMenuItems()
@@ -155,16 +145,12 @@ void WifiMenuScreen::drawMenuItems()
     visibleIndex++;
   }
 
-  display->drawFastHLine(
-    8,
-    184,
-    display->width() - 16,
-    ILI9341_WHITE
-  );
+  UiStyle::drawDivider(display, 184);
 
   display->setTextSize(1);
   display->setTextColor(
-    ILI9341_WHITE
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
   );
 
   display->setCursor(12, 198);
@@ -196,6 +182,11 @@ void WifiMenuScreen::drawMenuItems()
 
   int16_t x = (display->width() - width) / 2;
 
+  display->setTextColor(
+    UiColor::TEXT_DIM,
+    UiColor::BACKGROUND
+  );
+
   display->setCursor(
     x,
     220
@@ -219,24 +210,24 @@ void WifiMenuScreen::drawMenuItem(
 
   if (selected)
   {
-    display->fillRect(
+    UiStyle::drawSelection(
+      display,
       ITEM_X,
       y - 5,
       ITEM_WIDTH,
-      ITEM_HEIGHT,
-      ILI9341_WHITE
+      ITEM_HEIGHT
     );
 
     display->setTextColor(
-      ILI9341_BLACK,
-      ILI9341_WHITE
+      UiColor::TEXT,
+      UiColor::SELECTION
     );
   }
   else
   {
     display->setTextColor(
-      ILI9341_WHITE,
-      ILI9341_BLACK
+      UiColor::TEXT_MUTED,
+      UiColor::BACKGROUND
     );
   }
 
