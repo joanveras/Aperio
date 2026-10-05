@@ -1,5 +1,6 @@
 #include "../../include/wifi/WifiMonitor.hpp"
 #include "../../include/wifi/WifiManagementUtils.hpp"
+#include "../../include/wifi/WifiPmfParser.hpp"
 
 #include <WiFi.h>
 #include <cstring>
@@ -453,6 +454,36 @@ void WifiMonitor::handleManagementFrame(
   uint8_t channel
 )
 {
+  /*
+   * Beacon and Probe Response carry
+   * the Information Elements used
+   * to discover the PMF state.
+  */
+  if (
+    subtype == ManagementSubtype::Beacon ||
+    subtype == ManagementSubtype::ProbeResponse
+  )
+  {
+    if (payload == nullptr || length < 24)
+    {
+      return;
+    }
+
+    WifiPmfMode pmf =
+      WifiPmfParser::parseManagementFrame(payload, length);
+
+    if (pmf != WifiPmfMode::PMF_UNKNOWN)
+    {
+      /*
+       * Address 3 of Beacon/Probe Response
+       * is the BSSID.
+      */
+      rememberApPmf(payload + 16, pmf);
+    }
+
+    return;
+  }
+
   WifiManagementEventType eventType;
 
   switch (subtype)
@@ -479,10 +510,13 @@ void WifiMonitor::handleManagementFrame(
   event.type = eventType;
 
   event.reasonCode =
-    static_cast<uint16_t>(payload[24]) |
+    static_cast<uint16_t>(
+      payload[24]
+    ) |
     (
-      static_cast<uint16_t>(payload[25])
-      << 8
+      static_cast<uint16_t>(
+        payload[25]
+      ) << 8
     );
 
   event.rssi = rssi;
@@ -508,14 +542,10 @@ void WifiMonitor::handleManagementFrame(
 
   uint8_t knownChannel = 0;
 
-  if (
-    findKnownApChannel(
-      event.bssid,
-      knownChannel
-    )
-  )
+  if (findKnownApChannel(event.bssid, knownChannel))
   {
     event.networkChannel = knownChannel;
+
     event.networkChannelKnown = true;
   }
 
@@ -692,6 +722,175 @@ bool WifiMonitor::rememberApChannel(const uint8_t* bssid, uint8_t channel)
       {
         knownApCount++;
       }
+
+      portEXIT_CRITICAL(
+        &knownApMux
+      );
+
+      return true;
+    }
+  }
+
+  portEXIT_CRITICAL(
+    &knownApMux
+  );
+
+  return false;
+}
+
+bool WifiMonitor::rememberApPmf(const uint8_t* bssid, WifiPmfMode pmf)
+{
+  if (bssid == nullptr || pmf == WifiPmfMode::PMF_UNKNOWN)
+  {
+    return false;
+  }
+
+  portENTER_CRITICAL(
+    &knownApMux
+  );
+
+  /*
+   * Updates existing entry.
+  */
+  for (size_t i = 0; i < KNOWN_AP_CACHE_SIZE; i++)
+  {
+    if (
+      knownApChannels[i].valid &&
+      macEquals(knownApChannels[i].bssid, bssid)
+    )
+    {
+      knownApChannels[i].pmf = pmf;
+
+      portEXIT_CRITICAL(
+        &knownApMux
+      );
+
+      return true;
+    }
+  }
+
+  /*
+   * The Beacon may have been captured
+   * before a scan placed the BSSID
+   * in the cache.
+   *
+   * In that case we create an entry
+   * only with PMF; channel stays 0.
+  */
+  for (size_t i = 0; i < KNOWN_AP_CACHE_SIZE; i++)
+  {
+    if (!knownApChannels[i].valid)
+    {
+      for (size_t j = 0; j < 6; j++)
+      {
+        knownApChannels[i].bssid[j] = bssid[j];
+      }
+
+      knownApChannels[i].pmf = pmf;
+
+      knownApChannels[i].valid = true;
+
+      if (knownApCount < KNOWN_AP_CACHE_SIZE)
+      {
+        knownApCount++;
+      }
+
+      portEXIT_CRITICAL(
+        &knownApMux
+      );
+
+      return true;
+    }
+  }
+
+  portEXIT_CRITICAL(
+    &knownApMux
+  );
+
+  return false;
+}
+
+bool WifiMonitor::getKnownApPmf(
+  const uint8_t* bssid, WifiPmfMode& pmf
+) const
+{
+  if (bssid == nullptr)
+  {
+    return false;
+  }
+
+  portENTER_CRITICAL(
+    &knownApMux
+  );
+
+  for (size_t i = 0; i < KNOWN_AP_CACHE_SIZE; i++)
+  {
+    if (
+      knownApChannels[i].valid &&
+      macEquals(knownApChannels[i].bssid, bssid)
+    )
+    {
+      if (knownApChannels[i].pmf == WifiPmfMode::PMF_UNKNOWN)
+      {
+        portEXIT_CRITICAL(
+          &knownApMux
+        );
+
+        return false;
+      }
+
+      pmf = knownApChannels[i].pmf;
+
+      portEXIT_CRITICAL(
+        &knownApMux
+      );
+
+      return true;
+    }
+  }
+
+  portEXIT_CRITICAL(
+    &knownApMux
+  );
+
+  return false;
+}
+
+bool WifiMonitor::getKnownApPmf(
+  const String& bssid, WifiPmfMode& pmf
+) const
+{
+  uint8_t mac[6];
+
+  if (!parseMacAddress(bssid, mac))
+  {
+    return false;
+  }
+
+  return getKnownApPmf(mac, pmf);
+}
+
+bool WifiMonitor::forgetKnownApPmf(const String& bssid)
+{
+  uint8_t mac[6];
+
+  if (!parseMacAddress(bssid, mac))
+  {
+    return false;
+  }
+
+  portENTER_CRITICAL(
+    &knownApMux
+  );
+
+  for (size_t i = 0; i < KNOWN_AP_CACHE_SIZE; i++)
+  {
+    if (
+      knownApChannels[i].valid &&
+      macEquals(knownApChannels[i].bssid, mac)
+    )
+    {
+      knownApChannels[i].pmf = WifiPmfMode::PMF_UNKNOWN;
 
       portEXIT_CRITICAL(
         &knownApMux
