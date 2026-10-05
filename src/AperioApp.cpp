@@ -223,13 +223,22 @@ void AperioApp::handleNavigation(ScreenId screenId)
       const WifiNetwork* network =
         wifiNetworkListScreen.getSelectedNetwork();
 
-      wifiNetworkDetailScreen.setNetwork(
-        network
-      );
+      if (network == nullptr)
+      {
+        break;
+      }
 
-      screenManager.setScreen(
-        &wifiNetworkDetailScreen
-      );
+      /*
+        * We make a copy because we will
+        * enrich it with the detected PMF.
+      */
+      WifiNetwork detailedNetwork = *network;
+
+      detailedNetwork.pmf = detectNetworkPmf(detailedNetwork);
+
+      wifiNetworkDetailScreen.setNetwork(detailedNetwork);
+
+      screenManager.setScreen(&wifiNetworkDetailScreen);
 
       break;
     }
@@ -341,4 +350,42 @@ void AperioApp::handleNavigation(ScreenId screenId)
     default:
       break;
   }
+}
+
+WifiPmfMode AperioApp::detectNetworkPmf(const WifiNetwork& network)
+{
+  /*
+   * Does not reuse old result.
+  */
+  wifiMonitor.forgetKnownApPmf( network.bssid);
+
+  /*
+   * Listens on exactly the channel
+   * of the selected network.
+  */
+  if (!wifiMonitor.start( network.channel))
+  {
+    return
+      WifiPmfMode::PMF_UNKNOWN;
+  }
+
+  WifiPmfMode detectedPmf = WifiPmfMode::PMF_UNKNOWN;
+
+  constexpr uint32_t PMF_CHECK_TIMEOUT = 1000;
+
+  uint32_t startTime = millis();
+
+  while (millis() - startTime < PMF_CHECK_TIMEOUT)
+  {
+    if (wifiMonitor.getKnownApPmf(network.bssid, detectedPmf))
+    {
+      break;
+    }
+
+    delay(10);
+  }
+
+  wifiMonitor.stop();
+
+  return detectedPmf;
 }
