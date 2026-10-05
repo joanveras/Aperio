@@ -34,3 +34,22 @@ inline const char* wifiAuthModeToString(wifi_auth_mode_t mode)
       return "UNKNOWN";
   }
 }
+
+inline const char* wifiPmfModeToString(WifiPmfMode mode)
+{
+  switch (mode)
+  {
+    case WifiPmfMode::PMF_DISABLED:
+      return "DISABLED";
+
+    case WifiPmfMode::PMF_OPTIONAL:
+      return "OPTIONAL";
+
+    case WifiPmfMode::PMF_REQUIRED:
+      return "REQUIRED";
+
+    case WifiPmfMode::PMF_UNKNOWN:
+    default:
+      return "UNKNOWN";
+  }
+}
