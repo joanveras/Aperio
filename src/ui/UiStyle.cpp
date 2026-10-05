@@ -1,15 +1,13 @@
 #include "ui/UiStyle.hpp"
 
-#include <Fonts/FreeSans9pt7b.h>
-#include <Fonts/FreeSansBold9pt7b.h>
-#include <Fonts/FreeSansBold12pt7b.h>
+#include "ui/fonts/CascadiaMono.h"
 
 // Defined here only, so the font data lives in one place in flash.
 namespace UiFont
 {
-  const GFXfont* TITLE = &FreeSansBold12pt7b;
-  const GFXfont* ITEM = &FreeSansBold9pt7b;
-  const GFXfont* BODY = &FreeSans9pt7b;
+  const GFXfont* TITLE = &Cascadia_Title;  // Bold, screen titles
+  const GFXfont* ITEM = &Cascadia_Item;    // SemiBold, menu items
+  const GFXfont* BODY = &Cascadia_Body;    // Regular, larger body text
 }
 
 namespace

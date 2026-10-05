@@ -31,10 +31,14 @@ namespace UiColor
 }
 
 // Fonts used by the "chrome" of the UI: titles, menu items and the larger
-// messages. They are defined once in UiStyle.cpp. Dense tabular screens
-// (lists, the monitor stats grid) keep the built-in fixed-width font,
-// because these proportional fonts are about twice as wide and would
-// overflow those tight columns.
+// messages. They are Cascadia Mono, converted to the Adafruit GFX format
+// (see include/ui/fonts/CascadiaMono.h). Defined once in UiStyle.cpp.
+//
+// Dense tabular screens (lists, the monitor stats grid) still use the
+// built-in 5x7 font: Cascadia at this size is taller and a little wider than
+// the 6px built-in glyphs, and those columns are laid out for the built-in
+// metrics. Because Cascadia is monospaced, moving them over later is mostly
+// a matter of re-spacing the columns rather than measuring each string.
 namespace UiFont
 {
   extern const GFXfont* TITLE;  // screen titles
