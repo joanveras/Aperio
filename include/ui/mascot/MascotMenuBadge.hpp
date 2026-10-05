@@ -74,6 +74,7 @@ private:
   static constexpr float WAVE_RADIUS = 38.0f;
   static constexpr float WAVE_SPACING = 5.0f;
   static constexpr float WAVE_SPAN = 0.48f;
+  static constexpr float WAVE_SPAN_VAR = 0.55f;        // arcs of different sizes
   static constexpr float WAVE_PHASE_PER_MS = 0.0004f;  // ~2.5 s per breath
 
   Adafruit_ILI9341* display;

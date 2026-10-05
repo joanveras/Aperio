@@ -430,12 +430,17 @@ void MascotRenderer::drawWaves(
         + drift
         + (amplitude - 1.0f) * 4.0f;
 
+      // Vary each arc's length so they are not all the same size. With
+      // waveSpanVar at 0 (the default) every arc keeps the full waveSpan.
+      float sizeMix = 0.5f + 0.5f * sinf(cycle * 0.5f + wave * 2.3f + side * 1.1f);
+      float arcSpan = pose.waveSpan * (1.0f - pose.waveSpanVar * sizeMix);
+
       drawArc(
         canvas,
         eye,
         side,
         radius,
-        pose.waveSpan,
+        arcSpan,
         pose.waveIntensity * strength * amplitude,
         side > 0 ? RIGHT_DASHES[wave] : LEFT_DASHES[wave]
       );

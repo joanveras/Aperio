@@ -122,6 +122,7 @@ bool MascotMenuBadge::update(uint32_t now)
   pose.waveMode = WaveMode::BREATHE;
   pose.waveIntensity = WAVE_INTENSITY;
   pose.waveSpan = WAVE_SPAN;
+  pose.waveSpanVar = WAVE_SPAN_VAR;
   pose.waveSpacing = WAVE_SPACING;
   pose.waveRadius = WAVE_RADIUS + 1.5f * sinf(ts * 1.3f + 0.7f);
   pose.waveAmpLeft = clampf(
