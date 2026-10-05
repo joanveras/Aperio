@@ -9,10 +9,12 @@ WifiNetworkDetailScreen::WifiNetworkDetailScreen(
 }
 
 void WifiNetworkDetailScreen::setNetwork(
-  const WifiNetwork* networkInstance
+  const WifiNetwork& networkInstance
 )
 {
   network = networkInstance;
+  hasNetwork = true;
+
   needsRedraw = true;
 }
 
@@ -46,7 +48,7 @@ void WifiNetworkDetailScreen::render()
 
   drawHeader();
 
-  if (network == nullptr)
+  if (!hasNetwork)
   {
     drawCentered(
       "NO NETWORK SELECTED",
@@ -83,7 +85,7 @@ void WifiNetworkDetailScreen::drawHeader()
 
 void WifiNetworkDetailScreen::drawDetails()
 {
-  if (network == nullptr)
+  if (!hasNetwork)
   {
     return;
   }
@@ -95,63 +97,70 @@ void WifiNetworkDetailScreen::drawDetails()
   );
 
   // SSID
-  display->setCursor(20, 52);
+  display->setCursor(20, 46);
   display->print("SSID");
 
-  display->setCursor(20, 66);
+  display->setCursor(20, 60);
 
-  if (network->ssid.isEmpty())
+  if (network.ssid.isEmpty())
   {
     display->print("-- hidden --");
   }
   else
   {
-    String ssid = network->ssid;
+    String ssid = network.ssid;
 
     constexpr size_t MAX_SSID_LENGTH = 42;
 
     if (ssid.length() > MAX_SSID_LENGTH)
     {
-      ssid =
-        ssid.substring(
-          0,
-          MAX_SSID_LENGTH - 3
-        ) + "...";
+      ssid = ssid.substring(0, MAX_SSID_LENGTH - 3) + "...";
     }
 
     display->print(ssid);
   }
 
   // BSSID
-  display->setCursor(20, 90);
+  display->setCursor(20, 82);
   display->print("BSSID");
 
-  display->setCursor(20, 104);
-  display->print(network->bssid);
+  display->setCursor(20, 96);
+  display->print(network.bssid);
 
   // RSSI
-  display->setCursor(20, 130);
+  display->setCursor(20, 120);
   display->print("RSSI");
 
-  display->setCursor(110, 130);
-  display->print(network->rssi);
+  display->setCursor(110, 120);
+  display->print(network.rssi);
   display->print(" dBm");
 
   // Channel
-  display->setCursor(20, 148);
+  display->setCursor(20, 138);
   display->print("Channel");
 
-  display->setCursor(110, 148);
-  display->print(network->channel);
+  display->setCursor(110, 138);
+  display->print(network.channel);
 
   // Security
-  display->setCursor(20, 166);
+  display->setCursor(20, 156);
   display->print("Security");
 
-  display->setCursor(110, 166);
+  display->setCursor(110, 156);
   display->print(
     wifiAuthModeToString(
-      network->security
+      network.security
+    )
+  );
+
+  // PMF
+  display->setCursor(20, 174);
+  display->print("PMF");
+
+  display->setCursor(110, 174);
+  display->print(
+    wifiPmfModeToString(
+      network.pmf
     )
   );
 }
