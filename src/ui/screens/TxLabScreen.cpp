@@ -486,8 +486,8 @@ void TxLabScreen::drawHeader()
 
 void TxLabScreen::drawContent()
 {
-  constexpr int LABEL_X = 14;
-  constexpr int VALUE_X = 90;
+  constexpr int LABEL_X = 20;
+  constexpr int VALUE_X = 92;
 
   display->setTextSize(1);
 
@@ -722,12 +722,12 @@ uint16_t TxLabScreen::statusColor() const
 
 void TxLabScreen::drawReasonCode(int16_t y, bool selected)
 {
-  constexpr int ITEM_X = 10;
-  constexpr int ITEM_WIDTH = 300;
+  constexpr int ITEM_X = 12;
+  constexpr int ITEM_WIDTH = 296;
   constexpr int ITEM_HEIGHT = 20;
 
-  constexpr int LABEL_X = 14;
-  constexpr int VALUE_X = 90;
+  constexpr int LABEL_X = 20;
+  constexpr int VALUE_X = 92;
 
   const WifiReasonCode& reason = getSelectedReasonCode();
 
