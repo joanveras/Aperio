@@ -43,9 +43,6 @@ public:
   void update() override;
   void render() override;
 
-  // Never sleep while the TX Lab is set up to transmit.
-  bool allowsIdle() const override { return false; }
-
 private:
   static constexpr size_t PAYLOAD_COUNT = 2;
 
