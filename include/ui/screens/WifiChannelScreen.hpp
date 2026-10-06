@@ -28,7 +28,7 @@ private:
   static constexpr uint8_t MIN_CHANNEL = 1;
   static constexpr uint8_t MAX_CHANNEL = 11;
   static constexpr size_t CHANNEL_COUNT = 11;
-  static constexpr size_t VISIBLE_ITEM_COUNT = 5;
+  static constexpr size_t VISIBLE_ITEM_COUNT = 6;
 
   Adafruit_ILI9341* display;
   WifiScanner* scanner;

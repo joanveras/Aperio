@@ -200,8 +200,8 @@ void WifiChannelScreen::drawHeader()
 
 void WifiChannelScreen::drawChannels()
 {
-  constexpr int16_t START_Y = 52;
-  constexpr int16_t ITEM_SPACING = 26;
+  constexpr int16_t START_Y = 50;
+  constexpr int16_t ITEM_SPACING = 25;
 
   uint8_t lastVisibleChannel =
     firstVisibleChannel + VISIBLE_ITEM_COUNT - 1;

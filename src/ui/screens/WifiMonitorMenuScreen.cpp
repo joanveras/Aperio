@@ -127,8 +127,8 @@ void WifiMonitorMenuScreen::drawHeader()
 
 void WifiMonitorMenuScreen::drawMenuItems()
 {
-  constexpr int16_t START_Y = 58;
-  constexpr int16_t ITEM_SPACING = 27;
+  constexpr int16_t START_Y = 60;
+  constexpr int16_t ITEM_SPACING = 32;
 
   for (size_t i = 0; i < MENU_ITEM_COUNT; i++)
   {

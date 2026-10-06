@@ -246,8 +246,8 @@ void WifiManagementEventsScreen::drawEvents()
     return;
   }
 
-  constexpr int16_t START_Y = 52;
-  constexpr int16_t ITEM_SPACING = 26;
+  constexpr int16_t START_Y = 50;
+  constexpr int16_t ITEM_SPACING = 25;
 
   size_t lastVisibleItem = firstVisibleItem + VISIBLE_ITEM_COUNT;
 

@@ -253,8 +253,8 @@ void WifiNetworkListScreen::drawNetworks()
     return;
   }
 
-  constexpr int START_Y = 52;
-  constexpr int ITEM_SPACING = 26;
+  constexpr int START_Y = 50;
+  constexpr int ITEM_SPACING = 25;
 
   size_t lastVisible = firstVisibleItem + VISIBLE_ITEM_COUNT;
 
