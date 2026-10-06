@@ -37,7 +37,7 @@ namespace
   constexpr int16_t DASH_LENGTH = 12;
   constexpr int16_t DASH_GAP = 9;
 
-  constexpr int16_t LOG_X = 10;
+  constexpr int16_t LOG_X = 5;
   constexpr int16_t LOG_Y = 124;
   constexpr int16_t LOG_SPACING = 9;
   constexpr int16_t LOG_OK_COLUMN = 12;
@@ -51,13 +51,13 @@ namespace
     "> LOADING"
   };
 
-  constexpr int16_t BAR_X = 104;
+  constexpr int16_t BAR_X = 117;
   constexpr int16_t BAR_Y = 141;
-  constexpr int16_t BAR_WIDTH = 111;
+  constexpr int16_t BAR_WIDTH = 86;
   constexpr int16_t BAR_HEIGHT = 16;
   constexpr int16_t BAR_BORDER = 2;
   constexpr int16_t BAR_PADDING = 2;
-  constexpr uint8_t BAR_SEGMENTS = 13;
+  constexpr uint8_t BAR_SEGMENTS = 10;
   constexpr int16_t SEGMENT_WIDTH = 6;
   constexpr int16_t SEGMENT_PITCH = 8;
 
