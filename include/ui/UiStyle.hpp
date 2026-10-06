@@ -43,12 +43,20 @@ namespace UiStyle
     int16_t ruleEndX = -1
   );
 
+  // Small text on the right of the title line, e.g. the firmware version.
+  void drawTitleTag(Adafruit_ILI9341* display, const char* text);
+
   // Thin horizontal divider across the screen.
   void drawDivider(Adafruit_ILI9341* display, int16_t y);
 
   // The menus' footer: a green rule, "< PREV   OK   NEXT >" and, below,
   // "HOLD OK : BACK".
   void drawMenuFooter(Adafruit_ILI9341* display);
+
+  // The footer's centre action ("OK", "SEND", ...): big, bold and green,
+  // centred on the footer line whose size 1 text sits at `y`. Leaves the
+  // text size at 1.
+  void drawFooterAction(Adafruit_ILI9341* display, const char* text, int16_t y);
 
   // Background of a selected row: a plain dark green bar.
   // Text drawn on it should use UiColor::TEXT on UiColor::SELECTION.

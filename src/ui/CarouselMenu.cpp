@@ -22,26 +22,23 @@ namespace
   constexpr int16_t CONTENT_BOTTOM = 198;
 
   constexpr int16_t CENTER_X = 160;
-  constexpr int16_t CENTER_Y = 101;
-
-  constexpr int16_t RING_RADIUS = 29;
-  constexpr float RING_GAP = 38.0f;       // degrees, each side of the bottom
-  constexpr int16_t INNER_RING_RADIUS = 24;
-  constexpr int16_t DOT_RING_RADIUS = 36;
+  constexpr int16_t CENTER_Y = 110;
 
   constexpr int16_t ARC_RADIUS = 104;
   constexpr float ARC_SPAN = 20.0f;       // degrees, each side of horizontal
   constexpr int16_t DOT_ARC_RADIUS = 95;
   constexpr float DOT_ARC_SPAN = 44.0f;
 
-  constexpr int16_t SPOKE_START = 50;     // distance from the centre
-  constexpr int16_t SPOKE_END = 88;
+  constexpr int16_t SPOKE_START = 20;     // distance from the centre
+  constexpr int16_t SPOKE_END = 90;
 
-  constexpr int16_t PREVIOUS_Y = 41;
-  constexpr int16_t UP_ARROW_Y = 60;
-  constexpr int16_t SELECTED_Y = 137;
-  constexpr int16_t DOWN_ARROW_Y = 155;
-  constexpr int16_t NEXT_Y = 168;
+  // The selected name sits on the centre line, its neighbours above and
+  // below, each separated by a small arrow.
+  constexpr int16_t SELECTED_Y = CENTER_Y - 7;
+  constexpr int16_t UP_ARROW_Y = 89;
+  constexpr int16_t DOWN_ARROW_Y = 128;
+  constexpr int16_t PREVIOUS_Y = 64;
+  constexpr int16_t NEXT_Y = 142;
 
   constexpr uint8_t LABEL_SIZE = 2;
   constexpr int16_t LABEL_HEIGHT = 7 * LABEL_SIZE;
@@ -64,7 +61,7 @@ namespace
     int16_t h;
   };
 
-  // The labels' boxes; decoration never draws inside them.
+  // The labels' boxes (with a margin); decoration never draws inside them.
   Box labelBoxes[3];
 
   int16_t textWidth(Adafruit_ILI9341* display, const char* text, uint8_t size)
@@ -155,19 +152,12 @@ namespace
 
   void drawDecoration(Adafruit_ILI9341* display)
   {
-    // Ring around the selected item, open at the bottom for its label.
-    arc(display, RING_RADIUS, -180.0f + RING_GAP, 180.0f - RING_GAP, 3, RING);
-    arc(display, INNER_RING_RADIUS, -110.0f, 110.0f, 1, RING_SOFT);
-    dottedArc(display, DOT_RING_RADIUS, 35.0f, 140.0f, 9.0f, RING_SOFT);
-    dottedArc(display, DOT_RING_RADIUS, -140.0f, -35.0f, 9.0f, RING_SOFT);
-
-    // Centre point (where an icon can go later).
-    display->fillCircle(CENTER_X, CENTER_Y, 3, RING);
-    display->drawCircle(CENTER_X, CENTER_Y, 5, DECOR_DIM);
-
-    // Spokes out to the side arcs.
-    display->drawFastHLine(CENTER_X - SPOKE_END, CENTER_Y, SPOKE_END - SPOKE_START, RING_SOFT);
-    display->drawFastHLine(CENTER_X + SPOKE_START, CENTER_Y, SPOKE_END - SPOKE_START, RING_SOFT);
+    // Spokes out to the side arcs; they stop short of the selected name.
+    for (int16_t offset = SPOKE_START; offset < SPOKE_END; offset++)
+    {
+      plot(display, CENTER_X - offset, CENTER_Y, RING_SOFT);
+      plot(display, CENTER_X + offset, CENTER_Y, RING_SOFT);
+    }
 
     // Big side arcs, solid and dotted.
     arc(display, ARC_RADIUS, 90.0f - ARC_SPAN, 90.0f + ARC_SPAN, 2, RING);
@@ -191,9 +181,9 @@ namespace
   {
     const int16_t width = textWidth(display, label, LABEL_SIZE) + 1;
     return {
-      static_cast<int16_t>(CENTER_X - width / 2 - 3),
+      static_cast<int16_t>(CENTER_X - width / 2 - 6),
       static_cast<int16_t>(y - 3),
-      static_cast<int16_t>(width + 6),
+      static_cast<int16_t>(width + 12),
       static_cast<int16_t>(LABEL_HEIGHT + 6)
     };
   }

@@ -5,9 +5,10 @@
 
 #include "ui/MenuItem.hpp"
 
-// The menus' look: the selected item sits in the middle of a HUD ring,
-// with the previous item above and the next one below, both dimmed and
-// soft. The list is circular, so there is always one above and one below.
+// The main and Wi-Fi menus' look: the selected item's name sits in the
+// middle of the screen between two HUD side arcs, with the previous item
+// above and the next one below, both dimmed and soft. The list is
+// circular, so there is always one above and one below.
 //
 // Screens keep their own selection; these functions only draw.
 namespace CarouselMenu

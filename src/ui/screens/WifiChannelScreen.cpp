@@ -359,15 +359,6 @@ void WifiChannelScreen::drawFooter()
   );
 
   display->setCursor(
-    154,
-    198
-  );
-
-  display->print(
-    "OK"
-  );
-
-  display->setCursor(
     272,
     198
   );
@@ -375,6 +366,8 @@ void WifiChannelScreen::drawFooter()
   display->print(
     "NEXT >"
   );
+
+  UiStyle::drawFooterAction(display, "OK", 198);
 
   drawCentered(
     "HOLD OK : BACK",

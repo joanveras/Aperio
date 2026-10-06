@@ -845,14 +845,9 @@ void TxLabScreen::drawFooter()
     }
   }
 
-  drawCentered(
-    centerText,
-    198,
-    1,
-    UiColor::ACCENT
-  );
+  UiStyle::drawFooterAction(display, centerText, 198);
 
-  // drawCentered() left the accent color set; NEXT matches PREV.
+  // The action is drawn in the accent color; NEXT matches PREV.
   display->setTextColor(
     UiColor::TEXT_MUTED,
     UiColor::BACKGROUND

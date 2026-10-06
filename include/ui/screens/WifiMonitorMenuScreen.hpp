@@ -29,8 +29,18 @@ private:
   size_t selectedIndex = 0;
 
   bool needsRedraw = true;
-  bool needsFrame = true;
 
   void moveSelection(int direction);
   void selectCurrentItem();
+
+  void drawHeader();
+  void drawMenuItems();
+
+  void drawMenuItem(
+    size_t index,
+    int16_t y,
+    bool selected
+  );
+
+  void drawFooter();
 };

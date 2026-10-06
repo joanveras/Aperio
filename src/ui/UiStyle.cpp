@@ -8,6 +8,8 @@ namespace
   constexpr int16_t RULE_Y = 34;
   constexpr int16_t RULE_MARGIN = 10;
 
+  constexpr int16_t TAG_Y = 18;
+
   constexpr int16_t DIVIDER_MARGIN = 8;
 
   constexpr int16_t FOOTER_RULE_Y = 200;
@@ -75,6 +77,17 @@ void UiStyle::drawTitle(
   }
 }
 
+void UiStyle::drawTitleTag(Adafruit_ILI9341* display, const char* text)
+{
+  display->setTextSize(1);
+  display->setTextColor(UiColor::ACCENT_SOFT, UiColor::BACKGROUND);
+  display->setCursor(
+    display->width() - RULE_MARGIN - textWidth(display, text),
+    TAG_Y
+  );
+  display->print(text);
+}
+
 void UiStyle::drawDivider(Adafruit_ILI9341* display, int16_t y)
 {
   display->drawFastHLine(
@@ -106,14 +119,7 @@ void UiStyle::drawMenuFooter(Adafruit_ILI9341* display)
   display->setCursor(width - FOOTER_SIDE_X - textWidth(display, next), FOOTER_NAV_Y);
   display->print(next);
 
-  printBold(
-    display,
-    (width - 2 * textWidth(display, "OK")) / 2,
-    FOOTER_NAV_Y - 4,
-    "OK",
-    2,
-    UiColor::ACCENT
-  );
+  UiStyle::drawFooterAction(display, "OK", FOOTER_NAV_Y);
 
   const char* hint = "HOLD OK : BACK";
 
@@ -121,6 +127,27 @@ void UiStyle::drawMenuFooter(Adafruit_ILI9341* display)
   display->setTextColor(UiColor::TEXT_DIM, UiColor::BACKGROUND);
   display->setCursor((width - textWidth(display, hint)) / 2, FOOTER_HINT_Y);
   display->print(hint);
+}
+
+void UiStyle::drawFooterAction(
+  Adafruit_ILI9341* display,
+  const char* text,
+  int16_t y
+)
+{
+  display->setTextSize(2);
+  const int16_t width = textWidth(display, text) + 1;
+
+  printBold(
+    display,
+    (display->width() - width) / 2,
+    y - 4,
+    text,
+    2,
+    UiColor::ACCENT
+  );
+
+  display->setTextSize(1);
 }
 
 void UiStyle::drawSelection(
