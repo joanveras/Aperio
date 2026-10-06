@@ -253,8 +253,8 @@ void WifiNetworkListScreen::drawNetworks()
     return;
   }
 
-  constexpr int START_Y = 52;
-  constexpr int ITEM_SPACING = 26;
+  constexpr int START_Y = 50;
+  constexpr int ITEM_SPACING = 25;
 
   size_t lastVisible = firstVisibleItem + VISIBLE_ITEM_COUNT;
 
@@ -350,29 +350,7 @@ void WifiNetworkListScreen::drawNetworkItem(
 
 void WifiNetworkListScreen::drawFooter()
 {
-  UiStyle::drawDivider(display, 184);
-
-  display->setTextSize(1);
-  display->setTextColor(
-    UiColor::TEXT_MUTED,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(12, 198);
-  display->print("< PREV");
-
-  display->setCursor(154, 198);
-  display->print("OK");
-
-  display->setCursor(272, 198);
-  display->print("NEXT >");
-
-  drawCentered(
-    "HOLD OK : BACK",
-    220,
-    1,
-    UiColor::TEXT_DIM
-  );
+  UiStyle::drawFooter(display);
 }
 
 void WifiNetworkListScreen::drawCentered(

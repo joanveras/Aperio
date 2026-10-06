@@ -809,24 +809,6 @@ void TxLabScreen::drawReasonCode(int16_t y, bool selected)
 
 void TxLabScreen::drawFooter()
 {
-  UiStyle::drawDivider(display, 184);
-
-  display->setTextSize(1);
-
-  display->setTextColor(
-    UiColor::TEXT_MUTED,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(
-    12,
-    198
-  );
-
-  display->print(
-    "< PREV"
-  );
-
   const char* centerText = "SEND";
 
   if (mode == TxLabMode::CONFIGURE)
@@ -845,28 +827,7 @@ void TxLabScreen::drawFooter()
     }
   }
 
-  drawCentered(
-    centerText,
-    198,
-    1,
-    UiColor::ACCENT
-  );
-
-  display->setCursor(
-    272,
-    198
-  );
-
-  display->print(
-    "NEXT >"
-  );
-
-  drawCentered(
-    "HOLD OK : BACK",
-    220,
-    1,
-    UiColor::TEXT_DIM
-  );
+  UiStyle::drawFooter(display, centerText);
 }
 
 void TxLabScreen::drawError()

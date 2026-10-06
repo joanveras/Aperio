@@ -331,64 +331,17 @@ void WifiMonitorScreen::drawStats()
 
 void WifiMonitorScreen::drawFooter()
 {
-  UiStyle::drawDivider(display, 184);
-
   if (monitorStartFailed)
   {
-    drawCentered(
-      "HOLD OK : BACK",
-      220,
-      1,
-      UiColor::TEXT_DIM
-    );
-
+    UiStyle::drawFooter(display, nullptr, nullptr, nullptr);
     return;
   }
-
-  display->setTextSize(1);
-  display->setTextColor(
-    UiColor::TEXT_MUTED,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(12, 198);
-  display->print("< CH-");
 
   const char* centerText =
     monitor != nullptr && monitor->isPaused() ?
       "RESUME" : "PAUSE";
 
-  int16_t x1;
-  int16_t y1;
-  uint16_t width;
-  uint16_t height;
-
-  display->getTextBounds(
-    centerText,
-    0,
-    0,
-    &x1,
-    &y1,
-    &width,
-    &height
-  );
-
-  display->setCursor(
-    (display->width() - width) / 2,
-    198
-  );
-
-  display->print(centerText);
-
-  display->setCursor(278, 198);
-  display->print("CH+ >");
-
-  drawCentered(
-    "HOLD OK : BACK",
-    220,
-    1,
-    UiColor::TEXT_DIM
-  );
+  UiStyle::drawFooter(display, centerText, "< CH-", "CH+ >");
 }
 
 void WifiMonitorScreen::clearHeaderArea()

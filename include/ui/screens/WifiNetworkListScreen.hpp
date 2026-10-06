@@ -29,7 +29,7 @@ public:
   void render() override;
 
 private:
-  static constexpr size_t VISIBLE_ITEM_COUNT = 5;
+  static constexpr size_t VISIBLE_ITEM_COUNT = 6;
 
   Adafruit_ILI9341* display;
   WifiScanner* scanner;

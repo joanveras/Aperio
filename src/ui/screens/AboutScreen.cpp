@@ -77,14 +77,7 @@ void AboutScreen::render()
     UiColor::TEXT_DIM
   );
 
-  UiStyle::drawDivider(display, 204);
-
-  drawCentered(
-    "HOLD OK : BACK",
-    220,
-    1,
-    UiColor::TEXT_DIM
-  );
+  UiStyle::drawFooter(display, nullptr, nullptr, nullptr);
 
   needsRedraw = false;
 }

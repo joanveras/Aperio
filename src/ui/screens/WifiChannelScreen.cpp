@@ -200,8 +200,8 @@ void WifiChannelScreen::drawHeader()
 
 void WifiChannelScreen::drawChannels()
 {
-  constexpr int16_t START_Y = 52;
-  constexpr int16_t ITEM_SPACING = 26;
+  constexpr int16_t START_Y = 50;
+  constexpr int16_t ITEM_SPACING = 25;
 
   uint8_t lastVisibleChannel =
     firstVisibleChannel + VISIBLE_ITEM_COUNT - 1;
@@ -341,88 +341,5 @@ void WifiChannelScreen::drawChannelItem(
 
 void WifiChannelScreen::drawFooter()
 {
-  UiStyle::drawDivider(display, 184);
-
-  display->setTextSize(1);
-  display->setTextColor(
-    UiColor::TEXT_MUTED,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(
-    12,
-    198
-  );
-
-  display->print(
-    "< PREV"
-  );
-
-  display->setCursor(
-    154,
-    198
-  );
-
-  display->print(
-    "OK"
-  );
-
-  display->setCursor(
-    272,
-    198
-  );
-
-  display->print(
-    "NEXT >"
-  );
-
-  drawCentered(
-    "HOLD OK : BACK",
-    220,
-    1,
-    UiColor::TEXT_DIM
-  );
-}
-
-void WifiChannelScreen::drawCentered(
-  const char* text,
-  int16_t y,
-  uint8_t textSize,
-  uint16_t color
-)
-{
-  int16_t x1;
-  int16_t y1;
-
-  uint16_t width;
-  uint16_t height;
-
-  display->setTextSize(
-    textSize
-  );
-
-  display->setTextColor(
-    color
-  );
-
-  display->getTextBounds(
-    text,
-    0,
-    0,
-    &x1,
-    &y1,
-    &width,
-    &height
-  );
-
-  int16_t x = (display->width() -width) / 2;
-
-  display->setCursor(
-    x,
-    y
-  );
-
-  display->print(
-    text
-  );
+  UiStyle::drawFooter(display);
 }

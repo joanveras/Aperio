@@ -5,9 +5,9 @@
 
 // Colors and small drawing helpers shared by every screen.
 //
-// The palette comes from the mascot: black background, near-white text and
-// cyan as the only accent. Warning and danger exist for the few places that
-// must stand out (TX Lab, errors) and should stay rare.
+// Retro green CRT theme: black background, pale green text and a phosphor
+// green accent for rules, selection and hints. Warning and danger exist for
+// the few places that must stand out (TX Lab, errors) and should stay rare.
 namespace UiColor
 {
   constexpr uint16_t rgb(uint8_t r, uint8_t g, uint8_t b)
@@ -17,14 +17,13 @@ namespace UiColor
 
   constexpr uint16_t BACKGROUND = rgb(0, 0, 0);
 
-  constexpr uint16_t TEXT = rgb(240, 251, 255);       // titles, values, selection
-  constexpr uint16_t TEXT_MUTED = rgb(138, 166, 180); // labels, unselected items
-  constexpr uint16_t TEXT_DIM = rgb(74, 98, 112);     // hints, secondary info
+  constexpr uint16_t TEXT = rgb(226, 255, 230);       // titles, values, selection
+  constexpr uint16_t TEXT_MUTED = rgb(146, 182, 152); // labels, unselected items
+  constexpr uint16_t TEXT_DIM = rgb(102, 132, 108);   // hints, secondary info
 
-  constexpr uint16_t ACCENT = rgb(54, 196, 220);      // the mascot's signal cyan
-  constexpr uint16_t ACCENT_SOFT = rgb(24, 152, 176); // bars, quieter highlights
-  constexpr uint16_t LINE = rgb(17, 60, 75);          // dividers
-  constexpr uint16_t SELECTION = rgb(8, 38, 50);      // selected row background
+  constexpr uint16_t ACCENT = rgb(84, 255, 132);      // phosphor green
+  constexpr uint16_t ACCENT_SOFT = rgb(62, 196, 104); // rules, bars, quieter highlights
+  constexpr uint16_t SELECTION = rgb(14, 56, 26);     // selected row background
 
   constexpr uint16_t WARNING = rgb(255, 190, 70);
   constexpr uint16_t DANGER = rgb(240, 84, 96);
@@ -32,22 +31,48 @@ namespace UiColor
 
 namespace UiStyle
 {
-  // Screen title at the top left (text size 2), underlined by a short cyan
-  // dash that fades into a thin divider across the screen.
-  //
-  // `ruleEndX` is where the thin divider line stops on the right. Leave it
-  // at -1 for the full width; the menu screens pass a smaller value so the
-  // line does not run under the mascot in the corner.
+  // Screen title at the top left (text size 2, drawn bold), underlined by a
+  // green rule across the screen.
   void drawTitle(
     Adafruit_ILI9341* display,
-    const char* title,
-    int16_t ruleEndX = -1
+    const char* title
   );
 
-  // Thin horizontal divider across the screen.
-  void drawDivider(Adafruit_ILI9341* display, int16_t y);
+  // Small text on the right of the title line, e.g. the firmware version.
+  void drawTitleTag(Adafruit_ILI9341* display, const char* text);
 
-  // Background of a selected row: dark teal with a cyan bar on the left.
+  // The footer every screen shares, at the bottom of the screen: a green
+  // rule, a row with `previous`, `action` (big, green) and `next`, and the
+  // `hint` below. Pass nullptr to leave a part out.
+  void drawFooter(
+    Adafruit_ILI9341* display,
+    const char* action = "OK",
+    const char* previous = "< PREV",
+    const char* next = "NEXT >",
+    const char* hint = "HOLD OK : BACK"
+  );
+
+  // The built-in font at 1.5x (between size 1 and 2), top-left at x, y.
+  // `background` fills the text's box first.
+  constexpr int16_t LARGE_TEXT_HEIGHT = 12; // descenders included
+
+  void drawLargeText(
+    Adafruit_ILI9341* display,
+    const char* text,
+    int16_t x,
+    int16_t y,
+    uint16_t color,
+    uint16_t background
+  );
+
+  int16_t largeTextWidth(const char* text);
+
+  // The footer's centre action ("OK", "SEND", ...): big and green,
+  // centred on the footer line whose size 1 text sits at `y`. Leaves the
+  // text size at 1.
+  void drawFooterAction(Adafruit_ILI9341* display, const char* text, int16_t y);
+
+  // Background of a selected row: a plain dark green bar.
   // Text drawn on it should use UiColor::TEXT on UiColor::SELECTION.
   void drawSelection(
     Adafruit_ILI9341* display,

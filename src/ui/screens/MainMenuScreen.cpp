@@ -1,5 +1,5 @@
 #include "../../../include/ui/screens/MainMenuScreen.hpp"
-#include "ui/UiStyle.hpp"
+#include "ui/CarouselMenu.hpp"
 
 namespace
 {
@@ -20,13 +20,14 @@ MainMenuScreen::MainMenuScreen(
   : display(displayInstance),
     navigationCallback(navigationCallback),
     selectedIndex(0),
-    firstVisibleItem(0),
-    needsRedraw(true)
+    needsRedraw(true),
+    needsFrame(true)
 {
 }
 
 void MainMenuScreen::onEnter()
 {
+  needsFrame = true;
   needsRedraw = true;
 }
 
@@ -51,8 +52,13 @@ void MainMenuScreen::render()
     return;
   }
 
-  drawHeader();
-  drawMenuItems();
+  if (needsFrame)
+  {
+    CarouselMenu::drawFrame(display, "APERIO", "-QUOD LATET-", false);
+    needsFrame = false;
+  }
+
+  CarouselMenu::drawItems(display, mainMenuItems, MENU_ITEM_COUNT, selectedIndex);
 
   needsRedraw = false;
 }
@@ -82,84 +88,4 @@ void MainMenuScreen::openSelectedItem()
   {
     navigationCallback(destination);
   }
-}
-
-void MainMenuScreen::drawHeader()
-{
-  display->fillScreen(UiColor::BACKGROUND);
-
-  UiStyle::drawTitle(display, "APERIO");
-
-  display->setTextSize(1);
-  display->setTextColor(UiColor::TEXT_DIM, UiColor::BACKGROUND);
-  display->setCursor(286, 14);
-  display->print("v0.1");
-}
-
-void MainMenuScreen::drawMenuItems()
-{
-  constexpr int MENU_START_Y = 58;
-  constexpr int ITEM_SPACING = 32;
-
-  for (int i = 0; i < MENU_ITEM_COUNT; i++)
-  {
-    int y = MENU_START_Y + (i * ITEM_SPACING);
-
-    drawMenuItem(
-      i,
-      y,
-      i == selectedIndex
-    );
-  }
-
-  UiStyle::drawDivider(display, 199);
-
-  // Footer
-  display->setTextSize(1);
-  display->setTextColor(UiColor::TEXT_MUTED, UiColor::BACKGROUND);
-
-  display->setCursor(12, 216);
-  display->print("< PREV");
-
-  display->setCursor(154, 216);
-  display->print("OK");
-
-  display->setCursor(272, 216);
-  display->print("NEXT >");
-}
-
-void MainMenuScreen::drawMenuItem(int index, int y, bool selected)
-{
-  constexpr int ITEM_X = 12;
-  constexpr int ITEM_WIDTH = 296;
-  constexpr int ITEM_HEIGHT = 27;
-  constexpr int TEXT_X = 20;
-
-  if (selected)
-  {
-    UiStyle::drawSelection(
-      display,
-      ITEM_X,
-      y - 5,
-      ITEM_WIDTH,
-      ITEM_HEIGHT
-    );
-
-    display->setTextColor(
-      UiColor::TEXT,
-      UiColor::SELECTION
-    );
-  }
-  else
-  {
-    display->setTextColor(
-      UiColor::TEXT_MUTED,
-      UiColor::BACKGROUND
-    );
-  }
-
-  display->setTextSize(2);
-  display->setCursor(TEXT_X, y);
-
-  display->print(mainMenuItems[index].label);
 }

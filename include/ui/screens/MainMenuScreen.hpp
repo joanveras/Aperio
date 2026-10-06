@@ -27,13 +27,10 @@ private:
   NavigationCallback navigationCallback;
 
   int selectedIndex;
-  int firstVisibleItem;
   bool needsRedraw;
+  bool needsFrame;
 
   void moveSelection(int direction);
   void openSelectedItem();
 
-  void drawHeader();
-  void drawMenuItems();
-  void drawMenuItem(int index, int y, bool selected);
 };

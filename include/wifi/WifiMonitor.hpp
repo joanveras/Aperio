@@ -41,10 +41,6 @@ public:
     WifiManagementEvent& event
   ) const;
 
-  void clearManagementEvents();
-
-  void clearKnownApChannels();
-
   bool rememberApChannel(
     const uint8_t* bssid,
     uint8_t channel

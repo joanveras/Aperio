@@ -165,14 +165,7 @@ void WifiNetworkDetailScreen::drawDetails()
 
 void WifiNetworkDetailScreen::drawFooter()
 {
-  UiStyle::drawDivider(display, 194);
-
-  drawCentered(
-    "HOLD OK : BACK",
-    216,
-    1,
-    UiColor::TEXT_DIM
-  );
+  UiStyle::drawFooter(display, nullptr, nullptr, nullptr);
 }
 
 void WifiNetworkDetailScreen::drawCentered(

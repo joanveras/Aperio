@@ -1,5 +1,5 @@
 #include "../../../include/ui/screens/WifiMenuScreen.hpp"
-#include "ui/UiStyle.hpp"
+#include "ui/CarouselMenu.hpp"
 
 namespace
 {
@@ -21,13 +21,14 @@ WifiMenuScreen::WifiMenuScreen(
   : display(displayInstance),
     navigationCallback(navigationCallback),
     selectedIndex(0),
-    firstVisibleItem(0),
-    needsRedraw(true)
+    needsRedraw(true),
+    needsFrame(true)
 {
 }
 
 void WifiMenuScreen::onEnter()
 {
+  needsFrame = true;
   needsRedraw = true;
 }
 
@@ -52,8 +53,13 @@ void WifiMenuScreen::render()
     return;
   }
 
-  drawHeader();
-  drawMenuItems();
+  if (needsFrame)
+  {
+    CarouselMenu::drawFrame(display, "WI-FI", nullptr, true);
+    needsFrame = false;
+  }
+
+  CarouselMenu::drawItems(display, mainMenuItems, MENU_ITEM_COUNT, selectedIndex);
 
   needsRedraw = false;
 }
@@ -72,32 +78,6 @@ void WifiMenuScreen::moveSelection(int direction)
     selectedIndex = 0;
   }
 
-  if (selectedIndex < firstVisibleItem)
-  {
-    firstVisibleItem = selectedIndex;
-  }
-  else if (
-    selectedIndex >= firstVisibleItem + VISIBLE_ITEM_COUNT
-  )
-  {
-    firstVisibleItem = selectedIndex - VISIBLE_ITEM_COUNT + 1;
-  }
-
-  if (selectedIndex == 0)
-  {
-    firstVisibleItem = 0;
-  }
-
-  if (selectedIndex == MENU_ITEM_COUNT - 1)
-  {
-    firstVisibleItem = MENU_ITEM_COUNT - VISIBLE_ITEM_COUNT;
-
-    if (firstVisibleItem < 0)
-    {
-      firstVisibleItem = 0;
-    }
-  }
-
   needsRedraw = true;
 }
 
@@ -109,130 +89,4 @@ void WifiMenuScreen::openSelectedItem()
   {
     navigationCallback(destination);
   }
-}
-
-void WifiMenuScreen::drawHeader()
-{
-  display->fillScreen(UiColor::BACKGROUND);
-
-  UiStyle::drawTitle(display, "WI-FI");
-}
-
-void WifiMenuScreen::drawMenuItems()
-{
-  constexpr int MENU_START_Y = 52;
-  constexpr int ITEM_SPACING = 30;
-
-  int lastVisibleItem = firstVisibleItem + VISIBLE_ITEM_COUNT;
-
-  if (lastVisibleItem > MENU_ITEM_COUNT)
-  {
-    lastVisibleItem = MENU_ITEM_COUNT;
-  }
-
-  int visibleIndex = 0;
-
-  for (int i = firstVisibleItem; i < lastVisibleItem; i++)
-  {
-    int y = MENU_START_Y + (visibleIndex * ITEM_SPACING);
-
-    drawMenuItem(
-      i,
-      y,
-      i == selectedIndex
-    );
-
-    visibleIndex++;
-  }
-
-  UiStyle::drawDivider(display, 184);
-
-  display->setTextSize(1);
-  display->setTextColor(
-    UiColor::TEXT_MUTED,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(12, 198);
-  display->print("< PREV");
-
-  display->setCursor(154, 198);
-  display->print("OK");
-
-  display->setCursor(272, 198);
-  display->print("NEXT >");
-
-  const char* backText = "HOLD OK : BACK";
-
-  int16_t x1;
-  int16_t y1;
-
-  uint16_t width;
-  uint16_t height;
-
-  display->getTextBounds(
-    backText,
-    0,
-    0,
-    &x1,
-    &y1,
-    &width,
-    &height
-  );
-
-  int16_t x = (display->width() - width) / 2;
-
-  display->setTextColor(
-    UiColor::TEXT_DIM,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(
-    x,
-    220
-  );
-
-  display->print(
-    backText
-  );
-}
-
-void WifiMenuScreen::drawMenuItem(
-  int index,
-  int y,
-  bool selected
-)
-{
-  constexpr int ITEM_X = 12;
-  constexpr int ITEM_WIDTH = 296;
-  constexpr int ITEM_HEIGHT = 27;
-  constexpr int TEXT_X = 20;
-
-  if (selected)
-  {
-    UiStyle::drawSelection(
-      display,
-      ITEM_X,
-      y - 5,
-      ITEM_WIDTH,
-      ITEM_HEIGHT
-    );
-
-    display->setTextColor(
-      UiColor::TEXT,
-      UiColor::SELECTION
-    );
-  }
-  else
-  {
-    display->setTextColor(
-      UiColor::TEXT_MUTED,
-      UiColor::BACKGROUND
-    );
-  }
-
-  display->setTextSize(2);
-  display->setCursor(TEXT_X, y);
-
-  display->print(mainMenuItems[index].label);
 }
