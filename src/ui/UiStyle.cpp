@@ -16,6 +16,7 @@ namespace
   constexpr int16_t FOOTER_RULE_Y = 200;
   constexpr int16_t FOOTER_NAV_Y = 208;
   constexpr int16_t FOOTER_HINT_Y = 227;
+  constexpr int16_t FOOTER_HINT_ONLY_Y = 217; // centred under the rule
   constexpr int16_t FOOTER_SIDE_X = 14;
 
   // Where source pixel `i` starts once scaled to 1.5x, and how wide it is.
@@ -142,7 +143,13 @@ void UiStyle::drawFooter(
   {
     display->setTextSize(1);
     display->setTextColor(UiColor::TEXT_DIM, UiColor::BACKGROUND);
-    display->setCursor((width - textWidth(display, hint)) / 2, FOOTER_HINT_Y);
+    const bool hintOnly =
+      previous == nullptr && next == nullptr && action == nullptr;
+
+    display->setCursor(
+      (width - textWidth(display, hint)) / 2,
+      hintOnly ? FOOTER_HINT_ONLY_Y : FOOTER_HINT_Y
+    );
     display->print(hint);
   }
 }
