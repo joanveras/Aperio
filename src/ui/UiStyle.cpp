@@ -1,5 +1,7 @@
 #include "ui/UiStyle.hpp"
 
+#include <string.h>
+
 namespace
 {
   constexpr int16_t TITLE_X = 10;
@@ -129,23 +131,59 @@ void UiStyle::drawMenuFooter(Adafruit_ILI9341* display)
   display->print(hint);
 }
 
+// The built-in font only scales by whole numbers (size 2 is too big here),
+// so the text is rendered at size 1 off-screen and drawn at 1.5x: source
+// rows and columns alternate between 2 and 1 pixels.
 void UiStyle::drawFooterAction(
   Adafruit_ILI9341* display,
   const char* text,
   int16_t y
 )
 {
-  display->setTextSize(2);
-  const int16_t width = textWidth(display, text) + 1;
+  const int16_t length = strlen(text);
+  const int16_t sourceWidth = length * 6;
+  constexpr int16_t SOURCE_HEIGHT = 7;
 
-  printBold(
-    display,
-    (display->width() - width) / 2,
-    y - 4,
-    text,
-    2,
-    UiColor::ACCENT
-  );
+  GFXcanvas1 canvas(sourceWidth, 8);
+
+  if (canvas.getBuffer() == nullptr)
+  {
+    return;
+  }
+
+  canvas.setTextWrap(false);
+  canvas.setTextSize(1);
+  canvas.setTextColor(1);
+  canvas.setCursor(0, 0);
+  canvas.print(text);
+
+  // Where source pixel `i` starts once scaled, and how wide it is.
+  auto start = [](int16_t i) { return static_cast<int16_t>(i + (i + 1) / 2); };
+  auto span = [](int16_t i) { return static_cast<int16_t>(i % 2 == 0 ? 2 : 1); };
+
+  const int16_t width = start(sourceWidth - 1) + 1;
+  const int16_t height = start(SOURCE_HEIGHT);
+  const int16_t left = (display->width() - width) / 2;
+  const int16_t top = y + 3 - height / 2;
+
+  display->fillRect(left, top, width, height, UiColor::BACKGROUND);
+
+  for (int16_t row = 0; row < SOURCE_HEIGHT; row++)
+  {
+    for (int16_t column = 0; column < sourceWidth; column++)
+    {
+      if (canvas.getPixel(column, row))
+      {
+        display->fillRect(
+          left + start(column),
+          top + start(row),
+          span(column),
+          span(row),
+          UiColor::ACCENT
+        );
+      }
+    }
+  }
 
   display->setTextSize(1);
 }
