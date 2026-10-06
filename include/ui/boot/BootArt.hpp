@@ -46,6 +46,19 @@ namespace BootArt
     uint32_t seed
   );
 
+  // A tiny 3 x 5 pixel font for the init log, smaller than the built-in
+  // one. Only the characters the log uses exist (A-Z subset, '>', '.',
+  // '-', space); anything else draws as a blank cell.
+  constexpr int16_t TINY_ADVANCE = 4;
+
+  void drawTinyChar(
+    Adafruit_ILI9341* display,
+    int16_t x,
+    int16_t y,
+    char character,
+    uint16_t color
+  );
+
   // ---- Drawn into canvases every frame ---------------------------------
 
   // Same bracket, drawn into a canvas (the bottom ones share their space

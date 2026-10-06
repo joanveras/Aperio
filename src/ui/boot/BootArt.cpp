@@ -143,6 +143,51 @@ namespace
     return value;
   }
 
+  // ---- Tiny font ---------------------------------------------------------
+
+  struct TinyGlyph
+  {
+    char character;
+    uint8_t rows[5]; // 3 bits per row, bit 2 = left
+  };
+
+  constexpr TinyGlyph TINY_GLYPHS[] = {
+    {'>', {4, 2, 1, 2, 4}},
+    {'.', {0, 0, 0, 0, 2}},
+    {'-', {0, 0, 7, 0, 0}},
+    {'A', {2, 5, 7, 5, 5}},
+    {'B', {6, 5, 6, 5, 6}},
+    {'D', {6, 5, 5, 5, 6}},
+    {'E', {7, 4, 6, 4, 7}},
+    {'F', {7, 4, 6, 4, 4}},
+    {'G', {3, 4, 5, 5, 3}},
+    {'H', {5, 5, 7, 5, 5}},
+    {'I', {7, 2, 2, 2, 7}},
+    {'K', {5, 5, 6, 5, 5}},
+    {'L', {4, 4, 4, 4, 7}},
+    {'N', {5, 7, 7, 5, 5}},
+    {'O', {2, 5, 5, 5, 2}},
+    {'P', {6, 5, 6, 4, 4}},
+    {'S', {3, 4, 2, 1, 6}},
+    {'T', {7, 2, 2, 2, 2}},
+    {'U', {5, 5, 5, 5, 7}},
+    {'W', {5, 5, 7, 7, 5}},
+    {'Y', {5, 5, 2, 2, 2}}
+  };
+
+  const TinyGlyph* findTinyGlyph(char character)
+  {
+    for (const TinyGlyph& glyph : TINY_GLYPHS)
+    {
+      if (glyph.character == character)
+      {
+        return &glyph;
+      }
+    }
+
+    return nullptr;
+  }
+
   // ---- Emblem ------------------------------------------------------------
 
   // Plots a ring point with a soft halo: bright centre line, green body,
@@ -493,6 +538,35 @@ void BootArt::drawLogoNoise(
           CELL - 1,
           BootPalette::color(lit ? BootTone::MID : BootTone::DIM)
         );
+      }
+    }
+  }
+}
+
+void BootArt::drawTinyChar(
+  Adafruit_ILI9341* display,
+  int16_t x,
+  int16_t y,
+  char character,
+  uint16_t color
+)
+{
+  display->fillRect(x, y, 3, 5, BootPalette::color(BootTone::BLACK));
+
+  const TinyGlyph* glyph = findTinyGlyph(character);
+
+  if (glyph == nullptr)
+  {
+    return;
+  }
+
+  for (int16_t row = 0; row < 5; row++)
+  {
+    for (int16_t column = 0; column < 3; column++)
+    {
+      if ((glyph->rows[row] >> (2 - column)) & 1)
+      {
+        display->drawPixel(x + column, y + row, color);
       }
     }
   }

@@ -37,10 +37,11 @@ namespace
   constexpr int16_t DASH_LENGTH = 12;
   constexpr int16_t DASH_GAP = 9;
 
-  constexpr int16_t LOG_X = 5;
-  constexpr int16_t LOG_Y = 124;
-  constexpr int16_t LOG_SPACING = 9;
+  constexpr int16_t LOG_X = 10;
+  constexpr int16_t LOG_Y = 126;
+  constexpr int16_t LOG_SPACING = 8;
   constexpr int16_t LOG_OK_COLUMN = 12;
+  constexpr int16_t LOG_ADVANCE = BootArt::TINY_ADVANCE;
   constexpr int16_t CHAR_WIDTH = 6;
 
   constexpr const char* LOG_TEXT[] = {
@@ -394,7 +395,6 @@ void RetroBoot::drawLog(uint32_t elapsed)
 {
   const uint16_t textColor = BootPalette::color(BootTone::MID);
   const uint16_t okColor = BootPalette::color(BootTone::BRIGHT);
-  const uint16_t black = BootPalette::color(BootTone::BLACK);
 
   for (uint8_t line = 0; line < LOG_LINES; line++)
   {
@@ -406,13 +406,12 @@ void RetroBoot::drawLog(uint32_t elapsed)
 
     while (logChars[line] < visible)
     {
-      display->drawChar(
-        LOG_X + logChars[line] * CHAR_WIDTH,
+      BootArt::drawTinyChar(
+        display,
+        LOG_X + logChars[line] * LOG_ADVANCE,
         y,
         text[logChars[line]],
-        textColor,
-        black,
-        1
+        textColor
       );
 
       logChars[line]++;
@@ -425,8 +424,8 @@ void RetroBoot::drawLog(uint32_t elapsed)
       continue;
     }
 
-    display->drawChar(LOG_X + LOG_OK_COLUMN * CHAR_WIDTH, y, 'O', okColor, black, 1);
-    display->drawChar(LOG_X + (LOG_OK_COLUMN + 1) * CHAR_WIDTH, y, 'K', okColor, black, 1);
+    BootArt::drawTinyChar(display, LOG_X + LOG_OK_COLUMN * LOG_ADVANCE, y, 'O', okColor);
+    BootArt::drawTinyChar(display, LOG_X + (LOG_OK_COLUMN + 1) * LOG_ADVANCE, y, 'K', okColor);
     logOkShown[line] = true;
   }
 
@@ -449,13 +448,12 @@ void RetroBoot::drawLog(uint32_t elapsed)
 
   for (uint8_t dot = 0; dot < 3; dot++)
   {
-    display->drawChar(
-      LOG_X + (lastLength + dot) * CHAR_WIDTH,
+    BootArt::drawTinyChar(
+      display,
+      LOG_X + (lastLength + dot) * LOG_ADVANCE,
       LOG_Y + last * LOG_SPACING,
       dot < dots ? '.' : ' ',
-      textColor,
-      black,
-      1
+      textColor
     );
   }
 

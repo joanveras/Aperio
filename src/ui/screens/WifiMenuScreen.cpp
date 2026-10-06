@@ -122,8 +122,8 @@ void WifiMenuScreen::drawHeader()
 
 void WifiMenuScreen::drawMenuItems()
 {
-  constexpr int MENU_START_Y = 52;
-  constexpr int ITEM_SPACING = 27;
+  constexpr int MENU_START_Y = 49;
+  constexpr int ITEM_SPACING = 26;
 
   int lastVisibleItem = firstVisibleItem + VISIBLE_ITEM_COUNT;
 
