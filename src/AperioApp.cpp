@@ -10,6 +10,7 @@ AperioApp::AperioApp(
 )
   : display(displayInstance),
     bootAnimation(displayInstance),
+    screensaver(displayInstance),
     input(
       previousButtonPin,
       selectButtonPin,
@@ -100,6 +101,7 @@ void AperioApp::begin()
   if (bootAnimation.isFinished())
   {
     screenManager.begin(&mainMenu);
+    lastInteractionMs = millis();
   }
 }
 
@@ -115,13 +117,76 @@ void AperioApp::update()
     return;
   }
 
+  uint32_t now = millis();
+
+  // While the screensaver owns the display, it handles everything (and
+  // swallows the waking button), leaving the current screen frozen beneath.
+  if (uiState == UiState::SCREENSAVER)
+  {
+    updateScreensaver(event, now);
+    return;
+  }
+
+  // Any interaction pushes the inactivity timer forward.
   if (event != InputEvent::NONE)
   {
+    lastInteractionMs = now;
+
     screenManager.handleInput(event);
   }
 
   screenManager.update();
   screenManager.render();
+
+  // After a quiet stretch the screensaver takes over -- but never on a screen
+  // that is doing live work (it says so via allowsScreensaver()).
+  if (event == InputEvent::NONE
+      && (now - lastInteractionMs) >= SCREENSAVER_ENTER_MS
+      && screenManager.currentAllowsScreensaver())
+  {
+    if (screensaver.begin(now))
+    {
+      uiState = UiState::SCREENSAVER;
+    }
+    else
+    {
+      // Not enough memory for the canvas: stay put and try again later.
+      lastInteractionMs = now;
+    }
+  }
+}
+
+// The screensaver is a global state, not a screen: it never touches the
+// ScreenManager's history, so waking returns to exactly where the user was.
+void AperioApp::updateScreensaver(InputEvent event, uint32_t now)
+{
+  if (event != InputEvent::NONE && !screensaver.isWaking())
+  {
+    // Swallow the event: the first button only wakes the screensaver, it
+    // does not act on the screen underneath.
+    screensaver.wake(now);
+  }
+
+  if (screensaver.update(now))
+  {
+    screensaver.present();
+  }
+
+  if (screensaver.wakeFinished())
+  {
+    screensaver.end();
+
+    // Repaint the frozen screen exactly where it was. fillScreen clears the
+    // screensaver first; refresh() re-enters the current screen so it redraws.
+    display->fillScreen(ILI9341_BLACK);
+
+    screenManager.refresh();
+    screenManager.update();
+    screenManager.render();
+
+    lastInteractionMs = now;
+    uiState = UiState::ACTIVE;
+  }
 }
 
 // The main menu only starts once the boot animation is over. Any button
@@ -138,6 +203,7 @@ void AperioApp::updateBoot(InputEvent event)
   if (bootAnimation.isFinished())
   {
     screenManager.begin(&mainMenu);
+    lastInteractionMs = millis();
   }
 }
 

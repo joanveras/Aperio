@@ -18,6 +18,7 @@
 #include "ui/screens/WifiManagementEventsScreen.hpp"
 #include "ui/screens/TxLabScreen.hpp"
 #include "ui/mascot/BootAnimation.hpp"
+#include "ui/mascot/screensaver/ScreensaverController.hpp"
 #include "wifi/WifiTransmitter.hpp"
 #include "wifi/WifiScanner.hpp"
 #include "wifi/WifiMonitor.hpp"
@@ -39,6 +40,7 @@ private:
     Adafruit_ILI9341* display;
 
     BootAnimation bootAnimation;
+    ScreensaverController screensaver;
 
     InputManager input;
     ScreenManager screenManager;
@@ -63,7 +65,24 @@ private:
     WifiTransmitter wifiTransmitter;
     TxLabScreen txLabScreen;
 
+    // The screensaver takes over after this long with no input.
+    static constexpr uint32_t SCREENSAVER_ENTER_MS = 20000;
+
+    enum class UiState : uint8_t
+    {
+      ACTIVE,      // a normal screen is on; watching for inactivity
+      SCREENSAVER  // the screensaver owns the display until a button wakes it
+    };
+
+    UiState uiState = UiState::ACTIVE;
+    uint32_t lastInteractionMs = 0;
+
     void updateBoot(InputEvent event);
+
+    // Drives the screensaver while it owns the display. Any button wakes it
+    // and is swallowed here, so the first press only wakes and never acts on
+    // the screen underneath.
+    void updateScreensaver(InputEvent event, uint32_t now);
 
     void handleNavigation(ScreenId screenId);
 

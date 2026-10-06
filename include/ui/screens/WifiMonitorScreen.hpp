@@ -20,6 +20,9 @@ public:
   void update() override;
   void render() override;
 
+  // Never drift into the screensaver while the monitor is capturing traffic.
+  bool allowsScreensaver() const override { return false; }
+
 private:
   static constexpr uint32_t REFRESH_INTERVAL = 500;
 

@@ -92,6 +92,19 @@ void ScreenManager::update()
   }
 }
 
+bool ScreenManager::currentAllowsScreensaver() const
+{
+  return currentScreen ? currentScreen->allowsScreensaver() : true;
+}
+
+void ScreenManager::refresh()
+{
+  if (currentScreen)
+  {
+    currentScreen->onEnter();
+  }
+}
+
 void ScreenManager::render()
 {
   if (currentScreen)
