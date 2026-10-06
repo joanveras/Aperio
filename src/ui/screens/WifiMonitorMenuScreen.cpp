@@ -183,7 +183,7 @@ void WifiMonitorMenuScreen::drawMenuItem(
   display->setTextSize(2);
 
   display->setCursor(
-    20,
+    26,
     y
   );
 

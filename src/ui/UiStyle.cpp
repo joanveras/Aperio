@@ -17,7 +17,15 @@ namespace
   constexpr int16_t FOOTER_HINT_Y = 216;
   constexpr int16_t FOOTER_SIDE_X = 14;
 
-  constexpr int16_t SELECTION_BAR_WIDTH = 4;
+  // The selection marker: a neon ">" (3 x 5 pixels, bit 2 = left), the
+  // same one the boot screen's init log uses.
+  constexpr uint8_t CHEVRON_ROWS[] = {4, 2, 1, 2, 4};
+  constexpr int16_t CHEVRON_WIDTH = 3;
+  constexpr int16_t CHEVRON_HEIGHT = 5;
+
+  // Rows tall enough for size 2 text (the menus) get the chevron at 2x,
+  // with a little more room before the text.
+  constexpr int16_t LARGE_ROW_HEIGHT = 24;
 
   int16_t textWidth(Adafruit_ILI9341* display, const char* text)
   {
@@ -147,5 +155,25 @@ void UiStyle::drawSelection(
 )
 {
   display->fillRect(x, y, width, height, UiColor::SELECTION);
-  display->fillRect(x, y, SELECTION_BAR_WIDTH, height, UiColor::ACCENT);
+
+  const int16_t scale = height >= LARGE_ROW_HEIGHT ? 2 : 1;
+  const int16_t left = x + (scale == 2 ? 3 : 1);
+  const int16_t top = y + (height - CHEVRON_HEIGHT * scale) / 2;
+
+  for (int16_t row = 0; row < CHEVRON_HEIGHT; row++)
+  {
+    for (int16_t column = 0; column < CHEVRON_WIDTH; column++)
+    {
+      if ((CHEVRON_ROWS[row] >> (CHEVRON_WIDTH - 1 - column)) & 1)
+      {
+        display->fillRect(
+          left + column * scale,
+          top + row * scale,
+          scale,
+          scale,
+          UiColor::ACCENT
+        );
+      }
+    }
+  }
 }

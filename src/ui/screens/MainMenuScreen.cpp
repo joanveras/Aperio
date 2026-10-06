@@ -117,7 +117,7 @@ void MainMenuScreen::drawMenuItem(int index, int y, bool selected)
   constexpr int ITEM_X = 12;
   constexpr int ITEM_WIDTH = 296;
   constexpr int ITEM_HEIGHT = 25;
-  constexpr int TEXT_X = 20;
+  constexpr int TEXT_X = 26;
 
   if (selected)
   {
