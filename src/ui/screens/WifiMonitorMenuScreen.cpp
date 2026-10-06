@@ -1,6 +1,5 @@
 #include "ui/screens/WifiMonitorMenuScreen.hpp"
-#include "ui/UiStyle.hpp"
-#include "Config.hpp"
+#include "ui/CarouselMenu.hpp"
 
 namespace
 {
@@ -31,6 +30,7 @@ WifiMonitorMenuScreen::WifiMonitorMenuScreen(
 
 void WifiMonitorMenuScreen::onEnter()
 {
+  needsFrame = true;
   needsRedraw = true;
 }
 
@@ -61,20 +61,18 @@ void WifiMonitorMenuScreen::update()
 
 void WifiMonitorMenuScreen::render()
 {
-  if (!needsRedraw || display == nullptr)
+  if (!needsRedraw)
   {
     return;
   }
 
-  display->fillScreen(
-    UiColor::BACKGROUND
-  );
+  if (needsFrame)
+  {
+    CarouselMenu::drawFrame(display, "MONITOR", nullptr);
+    needsFrame = false;
+  }
 
-  display->setTextWrap(false);
-
-  drawHeader();
-  drawMenuItems();
-  drawFooter();
+  CarouselMenu::drawItems(display, monitorMenuItems, MENU_ITEM_COUNT, selectedIndex);
 
   needsRedraw = false;
 }
@@ -117,82 +115,4 @@ void WifiMonitorMenuScreen::selectCurrentItem()
   {
     navigationCallback(monitorMenuItems[selectedIndex].destination);
   }
-}
-
-void WifiMonitorMenuScreen::drawHeader()
-{
-  UiStyle::drawTitle(display, "MONITOR");
-  UiStyle::drawTitleTag(display, APERIO_VERSION);
-}
-
-void WifiMonitorMenuScreen::drawMenuItems()
-{
-  constexpr int16_t START_Y = 58;
-  constexpr int16_t ITEM_SPACING = 27;
-
-  for (size_t i = 0; i < MENU_ITEM_COUNT; i++)
-  {
-    int16_t y = START_Y + (static_cast<int16_t>(i) *ITEM_SPACING);
-
-    drawMenuItem(
-      i,
-      y,
-      i == selectedIndex
-    );
-  }
-}
-
-void WifiMonitorMenuScreen::drawMenuItem(
-  size_t index,
-  int16_t y,
-  bool selected
-)
-{
-  constexpr int16_t ITEM_X = 12;
-  constexpr int16_t ITEM_WIDTH = 296;
-  constexpr int16_t ITEM_HEIGHT = 25;
-
-  if (index >= MENU_ITEM_COUNT)
-  {
-    return;
-  }
-
-  if (selected)
-  {
-    UiStyle::drawSelection(
-      display,
-      ITEM_X,
-      y - 5,
-      ITEM_WIDTH,
-      ITEM_HEIGHT
-    );
-
-    display->setTextColor(
-      UiColor::TEXT,
-      UiColor::SELECTION
-    );
-  }
-  else
-  {
-    display->setTextColor(
-      UiColor::TEXT_MUTED,
-      UiColor::BACKGROUND
-    );
-  }
-
-  display->setTextSize(2);
-
-  display->setCursor(
-    20,
-    y
-  );
-
-  display->print(
-    monitorMenuItems[index].label
-  );
-}
-
-void WifiMonitorMenuScreen::drawFooter()
-{
-  UiStyle::drawMenuFooter(display);
 }

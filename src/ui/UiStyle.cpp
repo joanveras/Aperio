@@ -8,13 +8,11 @@ namespace
   constexpr int16_t RULE_Y = 34;
   constexpr int16_t RULE_MARGIN = 10;
 
-  constexpr int16_t TAG_Y = 18;
-
   constexpr int16_t DIVIDER_MARGIN = 8;
 
-  constexpr int16_t FOOTER_RULE_Y = 186;
-  constexpr int16_t FOOTER_NAV_Y = 197;
-  constexpr int16_t FOOTER_HINT_Y = 216;
+  constexpr int16_t FOOTER_RULE_Y = 200;
+  constexpr int16_t FOOTER_NAV_Y = 208;
+  constexpr int16_t FOOTER_HINT_Y = 227;
   constexpr int16_t FOOTER_SIDE_X = 14;
 
   int16_t textWidth(Adafruit_ILI9341* display, const char* text)
@@ -77,17 +75,6 @@ void UiStyle::drawTitle(
   }
 }
 
-void UiStyle::drawTitleTag(Adafruit_ILI9341* display, const char* text)
-{
-  display->setTextSize(1);
-  display->setTextColor(UiColor::ACCENT_SOFT, UiColor::BACKGROUND);
-  display->setCursor(
-    display->width() - RULE_MARGIN - textWidth(display, text),
-    TAG_Y
-  );
-  display->print(text);
-}
-
 void UiStyle::drawDivider(Adafruit_ILI9341* display, int16_t y)
 {
   display->drawFastHLine(
@@ -121,10 +108,10 @@ void UiStyle::drawMenuFooter(Adafruit_ILI9341* display)
 
   printBold(
     display,
-    (width - textWidth(display, "OK")) / 2,
-    FOOTER_NAV_Y,
+    (width - 2 * textWidth(display, "OK")) / 2,
+    FOOTER_NAV_Y - 4,
     "OK",
-    1,
+    2,
     UiColor::ACCENT
   );
 

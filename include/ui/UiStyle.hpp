@@ -43,9 +43,6 @@ namespace UiStyle
     int16_t ruleEndX = -1
   );
 
-  // Small text on the right of the title line, e.g. the firmware version.
-  void drawTitleTag(Adafruit_ILI9341* display, const char* text);
-
   // Thin horizontal divider across the screen.
   void drawDivider(Adafruit_ILI9341* display, int16_t y);
 
