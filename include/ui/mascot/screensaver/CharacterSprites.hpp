@@ -8,8 +8,9 @@
 // Sprites are kept as a grid of characters so they are easy to read and
 // tweak by hand: each character maps to a palette index, and a space is
 // transparent (the black background shows through). The character is a
-// chibi -- big head, small body -- and always faces right, since he walks
-// in from the left.
+// chibi -- big head, small body, a mop of hair, a hoodie -- holding the
+// glowing mini-Aperio, matching the storyboard. He faces the viewer, since
+// he walks in and then sits facing us.
 namespace CharacterSprites
 {
   // One frame of the character, as rows of legend characters.
@@ -20,18 +21,23 @@ namespace CharacterSprites
     const char* const* rows;
   };
 
-  // Legend -> palette index. See MascotColor.
-  //   'o' neon outline      '#' hoodie body      '=' shadow
-  //   'a' device frame      'A' device screen (bright cyan)
+  // Legend -> palette index (everything stays in the mascot's cyan/blue
+  // neon family).
+  //   'h' hair       'f' face        'e' eye
+  //   '#' hoodie      '=' shadow      'o' highlight / rim-light
+  //   'a' device frame                'A' device screen (bright cyan)
   inline uint8_t colorOf(char c)
   {
     switch (c)
     {
-      case 'o': return MascotColor::IRIS_LIGHT;
-      case '#': return MascotColor::IRIS_MID;
-      case '=': return MascotColor::IRIS_DARK;
-      case 'a': return MascotColor::WHITE;
-      case 'A': return MascotColor::SIGNAL_LAST;
+      case 'h': return MascotColor::IRIS_DARK;   // dark-blue hair
+      case 'f': return MascotColor::IRIS_LIGHT;  // light face
+      case 'e': return MascotColor::SCLERA;      // near-black eyes
+      case '#': return MascotColor::IRIS_MID;    // hoodie
+      case '=': return MascotColor::SCLERA;      // deep shadow
+      case 'o': return MascotColor::WHITE;       // rim-light / highlight
+      case 'a': return MascotColor::WHITE;       // device frame
+      case 'A': return MascotColor::SIGNAL_LAST; // device screen
       default:  return MascotColor::BLACK;
     }
   }
@@ -77,82 +83,112 @@ namespace CharacterSprites
 
   namespace detail
   {
-    // The head and torso are shared by every pose; only the legs change.
+    // Head + torso are shared by every pose; only the legs (last rows) change.
+    // 18 wide x 25 tall.
     inline constexpr const char* const STAND_ROWS[] = {
-      "   oooo     ",
-      "  o====o    ",
-      "  o=oo=o    ",
-      "  o====o    ",
-      "  o====o    ",
-      "   o==o     ",
-      "   oooo     ",
-      "  o####o    ",
-      "  o####o    ",
-      "  o####o    ",
-      "   o##o     ",
-      "   #  #     ",
-      "   #  #     ",
-      "   #  #     ",
-      "   o  o     ",
-      "  oo  oo    "
+      "      hhhhhh      ",
+      "    hhhhhhhhhh    ",
+      "   hhhhhhhhhhhh   ",
+      "   hhhhhhhhhhhh   ",
+      "   hhhffffffhhh   ",
+      "   hhffffffffhh   ",
+      "   hoffffffffoh   ",
+      "   hffeffffeffh   ",
+      "   hffffffffffh   ",
+      "   hffffeeffffh   ",
+      "   hhffffffffhh   ",
+      "    hhffffffhh    ",
+      "     hh====hh     ",
+      "     o######o     ",
+      "    o########o    ",
+      "   o###    ###o   ",
+      "   ###      ###   ",
+      "   ###      ###   ",
+      "   o###    ###o   ",
+      "    o########o    ",
+      "    ##########    ",
+      "    ###=  =###    ",
+      "    ###    ###    ",
+      "    ==      ==    ",
+      "    oo      oo    "
     };
 
     inline constexpr const char* const WALK_A_ROWS[] = {
-      "   oooo     ",
-      "  o====o    ",
-      "  o=oo=o    ",
-      "  o====o    ",
-      "  o====o    ",
-      "   o==o     ",
-      "   oooo     ",
-      "  o####o    ",
-      "  o####o    ",
-      "  o####o    ",
-      "   o##o     ",
-      "   ## #     ",
-      "   # # #    ",
-      "   #   #    ",
-      "   o   o    ",
-      "  oo   oo   "
+      "      hhhhhh      ",
+      "    hhhhhhhhhh    ",
+      "   hhhhhhhhhhhh   ",
+      "   hhhhhhhhhhhh   ",
+      "   hhhffffffhhh   ",
+      "   hhffffffffhh   ",
+      "   hoffffffffoh   ",
+      "   hffeffffeffh   ",
+      "   hffffffffffh   ",
+      "   hffffeeffffh   ",
+      "   hhffffffffhh   ",
+      "    hhffffffhh    ",
+      "     hh====hh     ",
+      "     o######o     ",
+      "    o########o    ",
+      "   o###    ###o   ",
+      "   ###      ###   ",
+      "   ###      ###   ",
+      "   o###    ###o   ",
+      "    o########o    ",
+      "    ##########    ",
+      "   ###=    =##    ",
+      "   ###      ##    ",
+      "   ==        =    ",
+      "   oo        o    "
     };
 
     inline constexpr const char* const WALK_B_ROWS[] = {
-      "   oooo     ",
-      "  o====o    ",
-      "  o=oo=o    ",
-      "  o====o    ",
-      "  o====o    ",
-      "   o==o     ",
-      "   oooo     ",
-      "  o####o    ",
-      "  o####o    ",
-      "  o####o    ",
-      "   o##o     ",
-      "   # ##     ",
-      "  # # #     ",
-      "  #   #     ",
-      "  o   o     ",
-      " oo   oo    "
+      "      hhhhhh      ",
+      "    hhhhhhhhhh    ",
+      "   hhhhhhhhhhhh   ",
+      "   hhhhhhhhhhhh   ",
+      "   hhhffffffhhh   ",
+      "   hhffffffffhh   ",
+      "   hoffffffffoh   ",
+      "   hffeffffeffh   ",
+      "   hffffffffffh   ",
+      "   hffffeeffffh   ",
+      "   hhffffffffhh   ",
+      "    hhffffffhh    ",
+      "     hh====hh     ",
+      "     o######o     ",
+      "    o########o    ",
+      "   o###    ###o   ",
+      "   ###      ###   ",
+      "   ###      ###   ",
+      "   o###    ###o   ",
+      "    o########o    ",
+      "    ##########    ",
+      "    ##=    =###   ",
+      "    ##      ###   ",
+      "    =        ==   ",
+      "    o        oo   "
     };
 
-    // The mini-Aperio he carries: a bright cyan screen in a white frame.
-    // Drawn separately from the body so it can stay on screen later, when
-    // the character dissolves (Cena 01, fase 12).
+    // The mini-Aperio he holds in front: a bright cyan screen in a white
+    // frame. Drawn separately from the body so it can stay on screen later,
+    // when the character dissolves (Cena 01, fase 12).
     inline constexpr const char* const DEVICE_ROWS[] = {
-      "aaa",
-      "aAa",
-      "aAa",
-      "aaa"
+      "aaaa",
+      "aAAa",
+      "aAAa",
+      "aAAa",
+      "aAAa",
+      "aaaa"
     };
   }
 
-  inline constexpr Sprite STAND  { 12, 16, detail::STAND_ROWS };
-  inline constexpr Sprite WALK_A { 12, 16, detail::WALK_A_ROWS };
-  inline constexpr Sprite WALK_B { 12, 16, detail::WALK_B_ROWS };
-  inline constexpr Sprite DEVICE { 3, 4, detail::DEVICE_ROWS };
+  inline constexpr Sprite STAND  { 18, 25, detail::STAND_ROWS };
+  inline constexpr Sprite WALK_A { 18, 25, detail::WALK_A_ROWS };
+  inline constexpr Sprite WALK_B { 18, 25, detail::WALK_B_ROWS };
+  inline constexpr Sprite DEVICE { 4, 6, detail::DEVICE_ROWS };
 
   // Where the device sits relative to the character's top-left corner
-  // (held in front, at chest height).
-  constexpr int16_t DEVICE_OFFSET_X = 8;
-  constexpr int16_t DEVICE_OFFSET_Y = 8;
+  // (held in front, in both hands, at chest height).
+  constexpr int16_t DEVICE_OFFSET_X = 7;
+  constexpr int16_t DEVICE_OFFSET_Y = 14;
 }
