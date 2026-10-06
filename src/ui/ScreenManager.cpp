@@ -92,19 +92,6 @@ void ScreenManager::update()
   }
 }
 
-bool ScreenManager::currentAllowsIdle() const
-{
-  return currentScreen ? currentScreen->allowsIdle() : true;
-}
-
-void ScreenManager::refresh()
-{
-  if (currentScreen)
-  {
-    currentScreen->onEnter();
-  }
-}
-
 void ScreenManager::render()
 {
   if (currentScreen)
