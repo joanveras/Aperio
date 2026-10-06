@@ -53,7 +53,7 @@ namespace UiStyle
   // "HOLD OK : BACK".
   void drawMenuFooter(Adafruit_ILI9341* display);
 
-  // Background of a selected row: dark green with a neon ">" on the left.
+  // Background of a selected row: a plain dark green bar.
   // Text drawn on it should use UiColor::TEXT on UiColor::SELECTION.
   void drawSelection(
     Adafruit_ILI9341* display,
