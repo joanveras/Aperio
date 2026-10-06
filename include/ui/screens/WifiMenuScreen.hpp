@@ -23,7 +23,7 @@ public:
   void render() override;
 
 private:
-  static constexpr int VISIBLE_ITEM_COUNT = 4;
+  static constexpr int VISIBLE_ITEM_COUNT = 5;
 
   Adafruit_ILI9341* display;
   NavigationCallback navigationCallback;

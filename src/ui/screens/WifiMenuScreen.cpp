@@ -1,5 +1,6 @@
 #include "../../../include/ui/screens/WifiMenuScreen.hpp"
 #include "ui/UiStyle.hpp"
+#include "Config.hpp"
 
 namespace
 {
@@ -116,12 +117,13 @@ void WifiMenuScreen::drawHeader()
   display->fillScreen(UiColor::BACKGROUND);
 
   UiStyle::drawTitle(display, "WI-FI");
+  UiStyle::drawTitleTag(display, APERIO_VERSION);
 }
 
 void WifiMenuScreen::drawMenuItems()
 {
   constexpr int MENU_START_Y = 52;
-  constexpr int ITEM_SPACING = 30;
+  constexpr int ITEM_SPACING = 27;
 
   int lastVisibleItem = firstVisibleItem + VISIBLE_ITEM_COUNT;
 
@@ -145,56 +147,7 @@ void WifiMenuScreen::drawMenuItems()
     visibleIndex++;
   }
 
-  UiStyle::drawDivider(display, 184);
-
-  display->setTextSize(1);
-  display->setTextColor(
-    UiColor::TEXT_MUTED,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(12, 198);
-  display->print("< PREV");
-
-  display->setCursor(154, 198);
-  display->print("OK");
-
-  display->setCursor(272, 198);
-  display->print("NEXT >");
-
-  const char* backText = "HOLD OK : BACK";
-
-  int16_t x1;
-  int16_t y1;
-
-  uint16_t width;
-  uint16_t height;
-
-  display->getTextBounds(
-    backText,
-    0,
-    0,
-    &x1,
-    &y1,
-    &width,
-    &height
-  );
-
-  int16_t x = (display->width() - width) / 2;
-
-  display->setTextColor(
-    UiColor::TEXT_DIM,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(
-    x,
-    220
-  );
-
-  display->print(
-    backText
-  );
+  UiStyle::drawMenuFooter(display);
 }
 
 void WifiMenuScreen::drawMenuItem(
@@ -205,7 +158,7 @@ void WifiMenuScreen::drawMenuItem(
 {
   constexpr int ITEM_X = 12;
   constexpr int ITEM_WIDTH = 296;
-  constexpr int ITEM_HEIGHT = 27;
+  constexpr int ITEM_HEIGHT = 25;
   constexpr int TEXT_X = 20;
 
   if (selected)

@@ -1,5 +1,6 @@
 #include "ui/screens/WifiMonitorMenuScreen.hpp"
 #include "ui/UiStyle.hpp"
+#include "Config.hpp"
 
 namespace
 {
@@ -121,12 +122,13 @@ void WifiMonitorMenuScreen::selectCurrentItem()
 void WifiMonitorMenuScreen::drawHeader()
 {
   UiStyle::drawTitle(display, "MONITOR");
+  UiStyle::drawTitleTag(display, APERIO_VERSION);
 }
 
 void WifiMonitorMenuScreen::drawMenuItems()
 {
-  constexpr int16_t START_Y = 62;
-  constexpr int16_t ITEM_SPACING = 34;
+  constexpr int16_t START_Y = 58;
+  constexpr int16_t ITEM_SPACING = 27;
 
   for (size_t i = 0; i < MENU_ITEM_COUNT; i++)
   {
@@ -148,7 +150,7 @@ void WifiMonitorMenuScreen::drawMenuItem(
 {
   constexpr int16_t ITEM_X = 12;
   constexpr int16_t ITEM_WIDTH = 296;
-  constexpr int16_t ITEM_HEIGHT = 27;
+  constexpr int16_t ITEM_HEIGHT = 25;
 
   if (index >= MENU_ITEM_COUNT)
   {
@@ -192,90 +194,5 @@ void WifiMonitorMenuScreen::drawMenuItem(
 
 void WifiMonitorMenuScreen::drawFooter()
 {
-  UiStyle::drawDivider(display, 184);
-
-  display->setTextSize(1);
-
-  display->setTextColor(
-    UiColor::TEXT_MUTED,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(
-    12,
-    198
-  );
-
-  display->print(
-    "< PREV"
-  );
-
-  display->setCursor(
-    154,
-    198
-  );
-
-  display->print(
-    "OK"
-  );
-
-  display->setCursor(
-    272,
-    198
-  );
-
-  display->print(
-    "NEXT >"
-  );
-
-  drawCentered(
-    "HOLD OK : BACK",
-    220,
-    1,
-    UiColor::TEXT_DIM
-  );
-}
-
-void WifiMonitorMenuScreen::drawCentered(
-  const char* text,
-  int16_t y,
-  uint8_t textSize,
-  uint16_t color
-)
-{
-  int16_t x1;
-  int16_t y1;
-
-  uint16_t width;
-  uint16_t height;
-
-  display->setTextSize(
-    textSize
-  );
-
-  display->setTextColor(
-    color,
-    UiColor::BACKGROUND
-  );
-
-  display->getTextBounds(
-    text,
-    0,
-    0,
-    &x1,
-    &y1,
-    &width,
-    &height
-  );
-
-  int16_t x = (display->width() - width) / 2;
-
-  display->setCursor(
-    x,
-    y
-  );
-
-  display->print(
-    text
-  );
+  UiStyle::drawMenuFooter(display);
 }

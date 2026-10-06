@@ -43,11 +43,4 @@ private:
   );
 
   void drawFooter();
-
-  void drawCentered(
-    const char* text,
-    int16_t y,
-    uint8_t textSize,
-    uint16_t color
-  );
 };
