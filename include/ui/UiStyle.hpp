@@ -52,6 +52,21 @@ namespace UiStyle
     const char* hint = "HOLD OK : BACK"
   );
 
+  // The built-in font at 1.5x (between size 1 and 2), top-left at x, y.
+  // `background` fills the text's box first.
+  constexpr int16_t LARGE_TEXT_HEIGHT = 12; // descenders included
+
+  void drawLargeText(
+    Adafruit_ILI9341* display,
+    const char* text,
+    int16_t x,
+    int16_t y,
+    uint16_t color,
+    uint16_t background
+  );
+
+  int16_t largeTextWidth(const char* text);
+
   // The footer's centre action ("OK", "SEND", ...): big and green,
   // centred on the footer line whose size 1 text sits at `y`. Leaves the
   // text size at 1.

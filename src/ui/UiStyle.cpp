@@ -18,6 +18,17 @@ namespace
   constexpr int16_t FOOTER_HINT_Y = 227;
   constexpr int16_t FOOTER_SIDE_X = 14;
 
+  // Where source pixel `i` starts once scaled to 1.5x, and how wide it is.
+  int16_t scaledStart(int16_t i)
+  {
+    return i + (i + 1) / 2;
+  }
+
+  int16_t scaledSpan(int16_t i)
+  {
+    return i % 2 == 0 ? 2 : 1;
+  }
+
   int16_t textWidth(Adafruit_ILI9341* display, const char* text)
   {
     int16_t x1;
@@ -136,18 +147,19 @@ void UiStyle::drawFooter(
   }
 }
 
-// The built-in font only scales by whole numbers (size 2 is too big here),
-// so the text is rendered at size 1 off-screen and drawn at 1.5x: source
-// rows and columns alternate between 2 and 1 pixels.
-void UiStyle::drawFooterAction(
+// The built-in font only scales by whole numbers (size 2 is too big in
+// places), so the text is rendered at size 1 off-screen and drawn at 1.5x:
+// source rows and columns alternate between 2 and 1 pixels.
+void UiStyle::drawLargeText(
   Adafruit_ILI9341* display,
   const char* text,
-  int16_t y
+  int16_t x,
+  int16_t y,
+  uint16_t color,
+  uint16_t background
 )
 {
-  const int16_t length = strlen(text);
-  const int16_t sourceWidth = length * 6;
-  constexpr int16_t SOURCE_HEIGHT = 7;
+  const int16_t sourceWidth = strlen(text) * 6;
 
   GFXcanvas1 canvas(sourceWidth, 8);
 
@@ -162,33 +174,47 @@ void UiStyle::drawFooterAction(
   canvas.setCursor(0, 0);
   canvas.print(text);
 
-  // Where source pixel `i` starts once scaled, and how wide it is.
-  auto start = [](int16_t i) { return static_cast<int16_t>(i + (i + 1) / 2); };
-  auto span = [](int16_t i) { return static_cast<int16_t>(i % 2 == 0 ? 2 : 1); };
+  display->fillRect(x, y, largeTextWidth(text), LARGE_TEXT_HEIGHT, background);
 
-  const int16_t width = start(sourceWidth - 1) + 1;
-  const int16_t height = start(SOURCE_HEIGHT);
-  const int16_t left = (display->width() - width) / 2;
-  const int16_t top = y + 3 - height / 2;
-
-  display->fillRect(left, top, width, height, UiColor::BACKGROUND);
-
-  for (int16_t row = 0; row < SOURCE_HEIGHT; row++)
+  for (int16_t row = 0; row < 8; row++)
   {
     for (int16_t column = 0; column < sourceWidth; column++)
     {
       if (canvas.getPixel(column, row))
       {
         display->fillRect(
-          left + start(column),
-          top + start(row),
-          span(column),
-          span(row),
-          UiColor::ACCENT
+          x + scaledStart(column),
+          y + scaledStart(row),
+          scaledSpan(column),
+          scaledSpan(row),
+          color
         );
       }
     }
   }
+}
+
+int16_t UiStyle::largeTextWidth(const char* text)
+{
+  const int16_t length = strlen(text);
+
+  return length == 0 ? 0 : scaledStart(length * 6 - 1) + 1;
+}
+
+void UiStyle::drawFooterAction(
+  Adafruit_ILI9341* display,
+  const char* text,
+  int16_t y
+)
+{
+  drawLargeText(
+    display,
+    text,
+    (display->width() - largeTextWidth(text)) / 2,
+    y + 3 - (LARGE_TEXT_HEIGHT - 1) / 2,
+    UiColor::ACCENT,
+    UiColor::BACKGROUND
+  );
 
   display->setTextSize(1);
 }

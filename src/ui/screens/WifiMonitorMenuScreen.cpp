@@ -151,6 +151,7 @@ void WifiMonitorMenuScreen::drawMenuItem(
   constexpr int16_t ITEM_X = 12;
   constexpr int16_t ITEM_WIDTH = 296;
   constexpr int16_t ITEM_HEIGHT = 25;
+  constexpr uint16_t ITEM_COLOR = UiColor::rgb(70, 124, 84);
 
   if (index >= MENU_ITEM_COUNT)
   {
@@ -166,29 +167,16 @@ void WifiMonitorMenuScreen::drawMenuItem(
       ITEM_WIDTH,
       ITEM_HEIGHT
     );
-
-    display->setTextColor(
-      UiColor::TEXT,
-      UiColor::SELECTION
-    );
-  }
-  else
-  {
-    display->setTextColor(
-      UiColor::TEXT_MUTED,
-      UiColor::BACKGROUND
-    );
   }
 
-  display->setTextSize(2);
-
-  display->setCursor(
+  // 1.5x text, vertically centred in the row; dark green unless selected.
+  UiStyle::drawLargeText(
+    display,
+    monitorMenuItems[index].label,
     20,
-    y
-  );
-
-  display->print(
-    monitorMenuItems[index].label
+    y + 2,
+    selected ? UiColor::TEXT : ITEM_COLOR,
+    selected ? UiColor::SELECTION : UiColor::BACKGROUND
   );
 }
 
