@@ -12,7 +12,6 @@ namespace
 
   constexpr int16_t TAG_Y = 18;
 
-  constexpr int16_t DIVIDER_MARGIN = 8;
 
   constexpr int16_t FOOTER_RULE_Y = 200;
   constexpr int16_t FOOTER_NAV_Y = 208;
@@ -57,26 +56,18 @@ namespace
 
 void UiStyle::drawTitle(
   Adafruit_ILI9341* display,
-  const char* title,
-  int16_t ruleEndX
+  const char* title
 )
 {
   display->setTextWrap(false);
   printBold(display, TITLE_X, TITLE_Y, title, 2, UiColor::TEXT);
 
-  const int16_t lineEnd = (ruleEndX >= 0)
-    ? ruleEndX
-    : display->width() - RULE_MARGIN;
-
-  if (lineEnd > TITLE_X)
-  {
-    display->drawFastHLine(
-      TITLE_X,
-      RULE_Y,
-      lineEnd - TITLE_X,
-      UiColor::ACCENT_SOFT
-    );
-  }
+  display->drawFastHLine(
+    TITLE_X,
+    RULE_Y,
+    display->width() - RULE_MARGIN - TITLE_X,
+    UiColor::ACCENT_SOFT
+  );
 }
 
 void UiStyle::drawTitleTag(Adafruit_ILI9341* display, const char* text)
@@ -88,16 +79,6 @@ void UiStyle::drawTitleTag(Adafruit_ILI9341* display, const char* text)
     TAG_Y
   );
   display->print(text);
-}
-
-void UiStyle::drawDivider(Adafruit_ILI9341* display, int16_t y)
-{
-  display->drawFastHLine(
-    DIVIDER_MARGIN,
-    y,
-    display->width() - 2 * DIVIDER_MARGIN,
-    UiColor::LINE
-  );
 }
 
 void UiStyle::drawFooter(

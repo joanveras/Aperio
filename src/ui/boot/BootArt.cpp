@@ -446,11 +446,6 @@ int16_t BootArt::logoWidth()
   return LOGO_LETTERS * GLYPH_ADVANCE - CELL;
 }
 
-int16_t BootArt::logoHeight()
-{
-  return GLYPH_SIZE;
-}
-
 void BootArt::drawLogoLetter(
   Adafruit_ILI9341* display,
   int16_t logoX,

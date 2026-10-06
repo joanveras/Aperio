@@ -23,7 +23,6 @@ namespace UiColor
 
   constexpr uint16_t ACCENT = rgb(84, 255, 132);      // phosphor green
   constexpr uint16_t ACCENT_SOFT = rgb(62, 196, 104); // rules, bars, quieter highlights
-  constexpr uint16_t LINE = rgb(28, 92, 48);          // thin dividers
   constexpr uint16_t SELECTION = rgb(14, 56, 26);     // selected row background
 
   constexpr uint16_t WARNING = rgb(255, 190, 70);
@@ -34,20 +33,13 @@ namespace UiStyle
 {
   // Screen title at the top left (text size 2, drawn bold), underlined by a
   // green rule across the screen.
-  //
-  // `ruleEndX` is where the rule stops on the right. Leave it at -1 for the
-  // full width.
   void drawTitle(
     Adafruit_ILI9341* display,
-    const char* title,
-    int16_t ruleEndX = -1
+    const char* title
   );
 
   // Small text on the right of the title line, e.g. the firmware version.
   void drawTitleTag(Adafruit_ILI9341* display, const char* text);
-
-  // Thin horizontal divider across the screen.
-  void drawDivider(Adafruit_ILI9341* display, int16_t y);
 
   // The footer every screen shares, at the bottom of the screen: a green
   // rule, a row with `previous`, `action` (big, green) and `next`, and the
@@ -60,7 +52,7 @@ namespace UiStyle
     const char* hint = "HOLD OK : BACK"
   );
 
-  // The footer's centre action ("OK", "SEND", ...): big, bold and green,
+  // The footer's centre action ("OK", "SEND", ...): big and green,
   // centred on the footer line whose size 1 text sits at `y`. Leaves the
   // text size at 1.
   void drawFooterAction(Adafruit_ILI9341* display, const char* text, int16_t y);

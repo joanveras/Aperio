@@ -3,7 +3,6 @@
 #include "Config.hpp"
 
 #include <math.h>
-#include <string.h>
 
 namespace
 {
@@ -234,7 +233,8 @@ namespace
 void CarouselMenu::drawFrame(
   Adafruit_ILI9341* display,
   const char* title,
-  const char* subtitle
+  const char* subtitle,
+  bool canGoBack
 )
 {
   display->fillScreen(UiColor::BACKGROUND);
@@ -272,7 +272,13 @@ void CarouselMenu::drawFrame(
   );
   display->print(APERIO_VERSION);
 
-  UiStyle::drawFooter(display);
+  UiStyle::drawFooter(
+    display,
+    "OK",
+    "< PREV",
+    "NEXT >",
+    canGoBack ? "HOLD OK : BACK" : nullptr
+  );
 }
 
 void CarouselMenu::drawItems(

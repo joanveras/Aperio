@@ -54,7 +54,7 @@ void MainMenuScreen::render()
 
   if (needsFrame)
   {
-    CarouselMenu::drawFrame(display, "APERIO", "-QUOD LATET-");
+    CarouselMenu::drawFrame(display, "APERIO", "-QUOD LATET-", false);
     needsFrame = false;
   }
 

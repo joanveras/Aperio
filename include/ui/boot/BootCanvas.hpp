@@ -20,11 +20,6 @@ public:
   bool begin();
   void end();
 
-  bool isReady() const;
-
-  int16_t width() const;
-  int16_t height() const;
-
   void clear();
 
   // Lights one pixel. A pixel never gets darker: the brighter tone wins.

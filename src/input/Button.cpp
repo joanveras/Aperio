@@ -84,11 +84,6 @@ bool Button::wasPressed()
   return event;
 }
 
-bool Button::isPressed() const
-{
-  return currentState;
-}
-
 bool Button::wasLongPressed()
 {
   bool event = longPressEvent;

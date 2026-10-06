@@ -55,7 +55,7 @@ void WifiMenuScreen::render()
 
   if (needsFrame)
   {
-    CarouselMenu::drawFrame(display, "WI-FI", nullptr);
+    CarouselMenu::drawFrame(display, "WI-FI", nullptr, true);
     needsFrame = false;
   }
 

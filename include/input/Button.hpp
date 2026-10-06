@@ -11,7 +11,6 @@ public:
 
   bool wasPressed();
   bool wasLongPressed();
-  bool isPressed() const;
 
 private:
   uint8_t pin;

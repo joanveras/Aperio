@@ -35,21 +35,6 @@ void BootCanvas::end()
   pixels = nullptr;
 }
 
-bool BootCanvas::isReady() const
-{
-  return pixels != nullptr;
-}
-
-int16_t BootCanvas::width() const
-{
-  return canvasWidth;
-}
-
-int16_t BootCanvas::height() const
-{
-  return canvasHeight;
-}
-
 void BootCanvas::clear()
 {
   if (pixels != nullptr)

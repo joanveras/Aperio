@@ -651,22 +651,6 @@ bool WifiMonitor::getManagementEvent(
   return true;
 }
 
-void WifiMonitor::clearManagementEvents()
-{
-  portENTER_CRITICAL(
-    &managementEventMux
-  );
-
-  managementEventCount = 0;
-  nextManagementEventIndex = 0;
-
-  lastManagementEvent = WifiManagementEvent{};
-
-  portEXIT_CRITICAL(
-    &managementEventMux
-  );
-}
-
 bool WifiMonitor::macEquals(const uint8_t* first, const uint8_t* second) const
 {
   return ::macEquals(first, second);
@@ -989,22 +973,4 @@ bool WifiMonitor::parseMacAddress(const String& text, uint8_t* mac) const
   }
 
   return true;
-}
-
-void WifiMonitor::clearKnownApChannels()
-{
-  portENTER_CRITICAL(
-    &knownApMux
-  );
-
-  for (size_t i = 0; i < KNOWN_AP_CACHE_SIZE; i++)
-  {
-    knownApChannels[i] = KnownApChannel{};
-  }
-
-  knownApCount = 0;
-
-  portEXIT_CRITICAL(
-    &knownApMux
-  );
 }

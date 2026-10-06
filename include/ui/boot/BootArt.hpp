@@ -28,7 +28,6 @@ namespace BootArt
   constexpr uint8_t LOGO_LETTERS = 6;
 
   int16_t logoWidth();
-  int16_t logoHeight();
 
   void drawLogoLetter(
     Adafruit_ILI9341* display,
