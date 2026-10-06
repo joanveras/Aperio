@@ -852,6 +852,12 @@ void TxLabScreen::drawFooter()
     UiColor::ACCENT
   );
 
+  // drawCentered() left the accent color set; NEXT matches PREV.
+  display->setTextColor(
+    UiColor::TEXT_MUTED,
+    UiColor::BACKGROUND
+  );
+
   display->setCursor(
     272,
     198
