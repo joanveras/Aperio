@@ -49,9 +49,16 @@ namespace UiStyle
   // Thin horizontal divider across the screen.
   void drawDivider(Adafruit_ILI9341* display, int16_t y);
 
-  // The menus' footer: a green rule, "< PREV   OK   NEXT >" and, below,
-  // "HOLD OK : BACK".
-  void drawMenuFooter(Adafruit_ILI9341* display);
+  // The footer every screen shares, at the bottom of the screen: a green
+  // rule, a row with `previous`, `action` (big, green) and `next`, and the
+  // `hint` below. Pass nullptr to leave a part out.
+  void drawFooter(
+    Adafruit_ILI9341* display,
+    const char* action = "OK",
+    const char* previous = "< PREV",
+    const char* next = "NEXT >",
+    const char* hint = "HOLD OK : BACK"
+  );
 
   // The footer's centre action ("OK", "SEND", ...): big, bold and green,
   // centred on the footer line whose size 1 text sits at `y`. Leaves the

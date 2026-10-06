@@ -65,14 +65,7 @@ void PlaceholderScreen::render()
   );
 
   // Footer
-  UiStyle::drawDivider(display, 199);
-
-  drawCentered(
-    "HOLD OK : BACK",
-    216,
-    1,
-    UiColor::TEXT_DIM
-  );
+  UiStyle::drawFooter(display, nullptr, nullptr, nullptr);
 
   needsRedraw = false;
 }

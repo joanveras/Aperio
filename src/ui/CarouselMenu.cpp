@@ -166,15 +166,22 @@ namespace
     dottedArc(display, DOT_ARC_RADIUS, -90.0f - DOT_ARC_SPAN, -90.0f + DOT_ARC_SPAN, 3.5f, DECOR_DIM);
   }
 
-  // Small chevron pointing up (direction -1) or down (+1).
+  // Small chevron pointing up (direction -1) or down (+1), centred on CENTER_X.
   void drawArrow(Adafruit_ILI9341* display, int16_t tipY, int8_t direction)
   {
     for (int16_t row = 0; row < 4; row++)
     {
       const int16_t y = tipY + (direction < 0 ? row : -row);
       display->drawFastHLine(CENTER_X - row - 1, y, 2, RING);
-      display->drawFastHLine(CENTER_X + row - 1, y, 2, RING);
+      display->drawFastHLine(CENTER_X + row, y, 2, RING);
     }
+  }
+
+  // The font advance leaves a blank column after the last glyph, so the ink
+  // is centred on CENTER_X (where the arrows sit) rather than the advance.
+  int16_t labelX(Adafruit_ILI9341* display, const char* label)
+  {
+    return CENTER_X - (textWidth(display, label, LABEL_SIZE) - LABEL_SIZE) / 2;
   }
 
   Box labelBox(Adafruit_ILI9341* display, const char* label, int16_t y)
@@ -191,7 +198,7 @@ namespace
   // A dimmed label with a soft halo, so it reads as out of focus.
   void drawNeighbor(Adafruit_ILI9341* display, const char* label, int16_t y)
   {
-    const int16_t x = CENTER_X - textWidth(display, label, LABEL_SIZE) / 2;
+    const int16_t x = labelX(display, label);
 
     display->setTextSize(LABEL_SIZE);
     display->setTextColor(NEIGHBOR_BLUR);
@@ -212,7 +219,7 @@ namespace
   // The selected label: bright and bold (drawn twice, 1 px apart).
   void drawSelected(Adafruit_ILI9341* display, const char* label, int16_t y)
   {
-    const int16_t x = CENTER_X - textWidth(display, label, LABEL_SIZE) / 2;
+    const int16_t x = labelX(display, label);
 
     display->setTextSize(LABEL_SIZE);
     display->setTextColor(UiColor::TEXT);
@@ -265,7 +272,7 @@ void CarouselMenu::drawFrame(
   );
   display->print(APERIO_VERSION);
 
-  UiStyle::drawMenuFooter(display);
+  UiStyle::drawFooter(display);
 }
 
 void CarouselMenu::drawItems(

@@ -100,9 +100,24 @@ void UiStyle::drawDivider(Adafruit_ILI9341* display, int16_t y)
   );
 }
 
-void UiStyle::drawMenuFooter(Adafruit_ILI9341* display)
+void UiStyle::drawFooter(
+  Adafruit_ILI9341* display,
+  const char* action,
+  const char* previous,
+  const char* next,
+  const char* hint
+)
 {
   const int16_t width = display->width();
+
+  // The footer may be redrawn with different labels: start clean.
+  display->fillRect(
+    0,
+    FOOTER_RULE_Y,
+    width,
+    display->height() - FOOTER_RULE_Y,
+    UiColor::BACKGROUND
+  );
 
   display->drawFastHLine(
     RULE_MARGIN,
@@ -114,21 +129,30 @@ void UiStyle::drawMenuFooter(Adafruit_ILI9341* display)
   display->setTextSize(1);
   display->setTextColor(UiColor::ACCENT_SOFT, UiColor::BACKGROUND);
 
-  display->setCursor(FOOTER_SIDE_X, FOOTER_NAV_Y);
-  display->print("< PREV");
+  if (previous != nullptr)
+  {
+    display->setCursor(FOOTER_SIDE_X, FOOTER_NAV_Y);
+    display->print(previous);
+  }
 
-  const char* next = "NEXT >";
-  display->setCursor(width - FOOTER_SIDE_X - textWidth(display, next), FOOTER_NAV_Y);
-  display->print(next);
+  if (next != nullptr)
+  {
+    display->setCursor(width - FOOTER_SIDE_X - textWidth(display, next), FOOTER_NAV_Y);
+    display->print(next);
+  }
 
-  UiStyle::drawFooterAction(display, "OK", FOOTER_NAV_Y);
+  if (action != nullptr)
+  {
+    UiStyle::drawFooterAction(display, action, FOOTER_NAV_Y);
+  }
 
-  const char* hint = "HOLD OK : BACK";
-
-  display->setTextSize(1);
-  display->setTextColor(UiColor::TEXT_DIM, UiColor::BACKGROUND);
-  display->setCursor((width - textWidth(display, hint)) / 2, FOOTER_HINT_Y);
-  display->print(hint);
+  if (hint != nullptr)
+  {
+    display->setTextSize(1);
+    display->setTextColor(UiColor::TEXT_DIM, UiColor::BACKGROUND);
+    display->setCursor((width - textWidth(display, hint)) / 2, FOOTER_HINT_Y);
+    display->print(hint);
+  }
 }
 
 // The built-in font only scales by whole numbers (size 2 is too big here),

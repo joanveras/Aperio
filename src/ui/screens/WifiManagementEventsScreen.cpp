@@ -380,41 +380,7 @@ void WifiManagementEventsScreen::drawEventItem(
 
 void WifiManagementEventsScreen::drawFooter()
 {
-  UiStyle::drawDivider(display, 184);
-
-  display->setTextSize(1);
-
-  display->setTextColor(
-    UiColor::TEXT_MUTED,
-    UiColor::BACKGROUND
-  );
-
-  display->setCursor(
-    12,
-    198
-  );
-
-  display->print(
-    "< PREV"
-  );
-
-  display->setCursor(
-    272,
-    198
-  );
-
-  display->print(
-    "NEXT >"
-  );
-
-  UiStyle::drawFooterAction(display, "OK", 198);
-
-  drawCentered(
-    "HOLD OK : BACK",
-    220,
-    1,
-    UiColor::TEXT_DIM
-  );
+  UiStyle::drawFooter(display);
 }
 
 void WifiManagementEventsScreen::drawCentered(

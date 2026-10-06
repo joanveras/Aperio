@@ -194,5 +194,5 @@ void WifiMonitorMenuScreen::drawMenuItem(
 
 void WifiMonitorMenuScreen::drawFooter()
 {
-  UiStyle::drawMenuFooter(display);
+  UiStyle::drawFooter(display);
 }
